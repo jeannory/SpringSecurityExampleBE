@@ -3,7 +3,6 @@ package com.example.security.config;
 import com.example.security.exceptions.CustomNoHeaderException;
 import com.example.security.models.TokenUtility;
 import com.example.security.services.IUserService;
-import com.example.security.contants.Constants;
 import org.jose4j.jwt.MalformedClaimException;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.example.security.contants.Constants.*;
+
 public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Autowired
@@ -41,7 +42,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(tokenUtility.getEmail());
                 List<SimpleGrantedAuthority> simpleGrantedAuthorities
                         = new ArrayList(tokenUtility.getRoles().stream()
-                        .map(role-> new SimpleGrantedAuthority(Constants.AUTHORITY_PREFIX + role))
+                        .map(role-> new SimpleGrantedAuthority(AUTHORITY_PREFIX + role))
                         .collect(Collectors.toCollection(ArrayList::new)));
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, simpleGrantedAuthorities);
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
@@ -57,8 +58,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     private String validateTokenHeader(HttpServletRequest httpServletRequest) {
         try {
-            final String requestTokenHeader = httpServletRequest.getHeader(Constants.HEADER_STRING);
-            String token = requestTokenHeader.replace(Constants.TOKEN_PREFIX, "");
+            final String requestTokenHeader = httpServletRequest.getHeader(HEADER_STRING);
+            String token = requestTokenHeader.replace(TOKEN_PREFIX, "");
             System.out.println("token : " + token);
             if(token==null){
                 throw new CustomNoHeaderException("token not found on header");

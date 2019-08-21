@@ -42,24 +42,25 @@ import static com.example.security.contants.Constants.AUTHORITY_PREFIX;
 public class UserServiceImpl implements UserDetailsService, IUserService, ITools {
 
     @Autowired
-    private UserRepository userRepository;
+    private TokenUtilityProvider tokenUtilityProvider;
 
     @Autowired
-    private IRoleService roleService;
-
-    @Autowired
-    AuthProvider authProvider;
+    private AuthProvider authProvider;
 
     @Autowired
     private SuperModelMapper superModelMapper;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private RoleRepository roleRepository;
 
     @Autowired
     private SpaceRepository spaceRepository;
+
     @Autowired
-    private TokenUtilityProvider tokenUtilityProvider;
+    private IRoleService roleService;
 
     @Override
     public void getDataTest() {
@@ -98,11 +99,18 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
         user3.setEmail("john@john.com");
         user3.setPassword(getStringSha3("0000"));
         user3.setRoles((Set<Role>)userRoles);
+        User user4 = new User();
+        user4.setEmail("johny@johny.com");
+        user4.setPassword(getStringSha3("0000"));
+        user4.setRoles((Set<Role>)userRoles);
         user1.setStatus(Status.ACTIVE);
         user2.setStatus(Status.ACTIVE);
         user3.setStatus(Status.ACTIVE);
+        user4.setStatus(Status.ACTIVE);
         userRepository.save(user1);
         userRepository.save(user2);
+        userRepository.save(user3);
+        userRepository.save(user4);
 
         Space space1 = new Space();
         space1.setName("Jean@jean.com space");
@@ -113,6 +121,16 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
         space2.setName("jeanne@jeanne.com space");
         space2.setUser(user2);
         spaceRepository.save(space2);
+
+        Space space3 = new Space();
+        space3.setName("john@john.com space");
+        space3.setUser(user3);
+        spaceRepository.save(space3);
+
+        Space space4 = new Space();
+        space4.setName("johny@johny.com space");
+        space4.setUser(user4);
+        spaceRepository.save(space4);
     }
 
     //@Secure needs to redefine loadUserByUsername(String username)

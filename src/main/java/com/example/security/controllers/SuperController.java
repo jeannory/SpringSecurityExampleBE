@@ -1,6 +1,5 @@
 package com.example.security.controllers;
 
-import com.example.security.dtos.SuperDTO;
 import org.springframework.http.HttpStatus;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -10,11 +9,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.server.ResponseStatusException;
 
 
-public class SuperController <D extends SuperDTO> {
+public class SuperController{
 
     private static UserDetails userDetails;
 
-    //toDo separate checking : first for token expiration, second for the user's equals
     private void getSecurityContextHolder() {
         UsernamePasswordAuthenticationToken authentication = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         userDetails = (UserDetails) authentication.getPrincipal();
@@ -31,8 +29,8 @@ public class SuperController <D extends SuperDTO> {
         }
     }
 
-    //for each @Secure ROLE_USER only himself can access + all ROLE_ADMIN
-    private boolean authorizeThisUser(String emailEntry) {
+    //for each @Secure ROLE_USER && ROLE_MANAGER only themself can access || all ROLE_ADMIN
+    public boolean validateThisUser(String emailEntry) {
         try {
             getSecurityContextHolder();
             boolean authorization = false;
@@ -56,7 +54,4 @@ public class SuperController <D extends SuperDTO> {
         }
     }
 
-    public boolean validateThisUser(String email) {
-            return authorizeThisUser(email);
-    }
 }

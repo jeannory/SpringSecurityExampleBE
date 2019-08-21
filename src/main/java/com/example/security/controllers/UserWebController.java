@@ -51,7 +51,7 @@ public class UserWebController extends SuperController {
     }
 
     //http://localhost:8080/api/UserWebController/getUserDto?email=jean@jean.com
-    @Secured({"ROLE_USER", "ROLE_MANAGER", "ROLE_ADMIN"})
+    @Secured({AUTHORITY_PREFIX+USER, AUTHORITY_PREFIX+MANAGER, AUTHORITY_PREFIX+ADMIN})
     @RequestMapping(path = "/getUserDto", method = RequestMethod.GET)
     public UserDTO getUserDto(@RequestParam("email") String email) {
             validateThisUser(email);
@@ -74,7 +74,7 @@ public class UserWebController extends SuperController {
     }
 
     //http://localhost:8080/api/UserWebController/getRoleDtos?email=jean@jean.com
-    @Secured({"ROLE_USER", "ROLE_MANAGER", "ROLE_ADMIN"})
+    @Secured({AUTHORITY_PREFIX+USER, AUTHORITY_PREFIX+MANAGER, AUTHORITY_PREFIX+ADMIN})
     @RequestMapping(path = "/getRoleDtos", method = RequestMethod.GET)
     public List<RoleDTO> getRoleDtos(@RequestParam("email") String email) {
             validateThisUser(email);
