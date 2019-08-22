@@ -106,7 +106,7 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
         user1.setStatus(Status.ACTIVE);
         user2.setStatus(Status.ACTIVE);
         user3.setStatus(Status.ACTIVE);
-        user4.setStatus(Status.ACTIVE);
+        user4.setStatus(Status.INACTIVE);
         userRepository.save(user1);
         userRepository.save(user2);
         userRepository.save(user3);
