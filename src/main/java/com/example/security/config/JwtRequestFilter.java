@@ -41,9 +41,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             if (tokenUtility.isValidateToken()) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(tokenUtility.getEmail());
                 List<SimpleGrantedAuthority> simpleGrantedAuthorities
-                        = new ArrayList(tokenUtility.getRoles().stream()
-                        .map(role-> new SimpleGrantedAuthority(AUTHORITY_PREFIX + role))
-                        .collect(Collectors.toCollection(ArrayList::new)));
+                        = tokenUtility.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(AUTHORITY_PREFIX + role))
+                        .collect(Collectors.toCollection(ArrayList::new));
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, simpleGrantedAuthorities);
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
                 SecurityContextHolder.getContext().setAuthentication(authentication);

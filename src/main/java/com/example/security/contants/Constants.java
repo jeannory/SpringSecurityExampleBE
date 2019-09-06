@@ -12,7 +12,5 @@ public class Constants {
     public static final String ADMIN = "ADMIN";
 
     public static final String PRE_PATH = "/api/";
-    public static final String TEST_CONTROLLER = "TestWebController";
     public static final String USER_CONTROLLER = "UserWebController";
-    public static final String BOX_CONTROLLER = "BoxWebController";
 }

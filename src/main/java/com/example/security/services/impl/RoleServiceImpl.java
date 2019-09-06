@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.annotation.ApplicationScope;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.example.security.contants.Constants.*;
 
@@ -63,63 +65,39 @@ public class RoleServiceImpl implements IRoleService {
 
     @Override
     public Set<Role> getUserRoleSet() {
-        Set<Role> userRoleSet = new HashSet(Collections.singletonList(getUserRole()));
-        return userRoleSet;
+        return Stream.of(getUserRole()).collect(Collectors.toCollection(HashSet::new));
     }
 
     @Override
     public Set<Role> getManagerRoleSet() {
-        Set<Role> managerRoleSet = new HashSet(Arrays.asList(getUserRole(), getManagerRole()));
-        return managerRoleSet;
+        return Stream.of(getUserRole(), getManagerRole()).collect(Collectors.toCollection(HashSet::new));
     }
 
     @Override
     public Set<Role> getAdminRoleSet() {
-        Set<Role> adminRoleSet = new HashSet(Arrays.asList(getUserRole(), getManagerRole(), getAdminRole()));
-        return adminRoleSet;
+        return Stream.of(getUserRole(), getManagerRole(), getAdminRole()).collect(Collectors.toCollection(HashSet::new));
     }
 
     @Override
     public Set<RoleDTO> getRoleDtosSet(String userEmail){
-        List<Role> roles = findByUsersEmail(userEmail);
-        try {
-            Set<RoleDTO> roleDTOS = new HashSet(Arrays.asList(superModelMapper.convertToDTOs(roles)));
-            return roleDTOS;
-        } catch (CustomConverterException ex) {
-            ex.printStackTrace();
-            return null;
-        }
+        return ((List<RoleDTO>) superModelMapper.convertToDTOs(findByUsersEmail(userEmail)).get()).stream().collect(Collectors.toCollection(HashSet::new));
     }
 
     @Override
     public List<RoleDTO> getRoleDtosList(String userEmail){
-        List<Role> roles = findByUsersEmail(userEmail);
-        try {
-            List<RoleDTO> roleDTOS = (List<RoleDTO>) superModelMapper.convertToDTOs(roles).get();
-            return roleDTOS;
-        } catch (CustomConverterException ex) {
-            ex.printStackTrace();
-            return null;
-        }
+        return (List<RoleDTO>) superModelMapper.convertToDTOs(findByUsersEmail(userEmail)).get();
     }
 
     @Override
     public List<RoleDTO> getAdminRoleDTOSet() {
-        try {
-
-            List<RoleDTO> adminRoleDTOSet = (List<RoleDTO>) (superModelMapper.convertToDTOs(new ArrayList(Arrays.asList(getUserRole(), getManagerRole(), getAdminRole()))).get());
-            return adminRoleDTOSet;
-        } catch (CustomConverterException ex) {
-            ex.printStackTrace();
-            return null;
-        }
+        return (List<RoleDTO>) superModelMapper.convertToDTOs(Stream.of(getUserRole(), getManagerRole(), getAdminRole()).collect(Collectors.toList())).get();
     }
 
     @Transactional
     @Override
-    public List<UserDTO> putUserRoles(String email, List<RoleDTO> roleDTOS) throws CustomConverterException {
+    public List<UserDTO> putUserRoles(String email, List<RoleDTO> roleDTOS) {
         User user = userRepository.findByEmail(email);
-        user.setRoles(new HashSet<Role>((List<Role>) superModelMapper.convertToEntities(roleDTOS).get()));
+        user.setRoles(new HashSet<>((List<Role>) superModelMapper.convertToEntities(roleDTOS).get()));
         userRepository.save(user);
         return userService.getUsers();
     }

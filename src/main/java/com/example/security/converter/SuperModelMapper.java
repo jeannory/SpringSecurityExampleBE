@@ -7,10 +7,13 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+//if conversion failed should return null
+//already manage for list
+//need to be manage for simple object in service
 @Service
 public class SuperModelMapper<E extends SuperEntity, D extends SuperDTO> {
 
@@ -18,47 +21,47 @@ public class SuperModelMapper<E extends SuperEntity, D extends SuperDTO> {
 
     public Optional<D> convertToDTO(E entity) throws CustomConverterException {
         modelMapper = new ModelMapper();
-        D d = modelMapper.map(entity, (Type) entity.getDTOClass());
-        if(d==null){
+        try {
+            D dto = modelMapper.map(entity, (Type) entity.getDTOClass());
+            return Optional.of(dto);
+        } catch (Exception ex) {
             throw new CustomConverterException("Conversion failed");
         }
-        return Optional.of(d);
     }
 
     public Optional<E> convertToEntity(D dto) throws CustomConverterException {
         modelMapper = new ModelMapper();
-            E e = modelMapper.map(dto, (Type) dto.getEntityClass());
-            if (e == null) {
-                throw new CustomConverterException("Conversion failed");
-            }
-        return Optional.of(e);
+        try {
+            E entiy = modelMapper.map(dto, (Type) dto.getEntityClass());
+            return Optional.of(entiy);
+        } catch (Exception ex) {
+            throw new CustomConverterException("Conversion failed");
+        }
     }
 
-    public Optional<List<D>> convertToDTOs(List<E> entities) throws CustomConverterException {
-        List<D> dtos = new ArrayList<>();
-        entities.forEach(entity -> {
-            try{
-                Optional<D> d = convertToDTO(entity);
-                dtos.add(convertToDTO(entity).get());
-            } catch (CustomConverterException ex) {
-                ex.printStackTrace();
-            }
-
-        });
-        return Optional.of(dtos);
+    public Optional<List<D>> convertToDTOs(List<E> entities) {
+        return Optional.of(
+                entities.stream().map(entity -> {
+                    try {
+                        Optional<D> dto = convertToDTO(entity);
+                        return dto.get();
+                    } catch (CustomConverterException ex) {
+                        ex.printStackTrace();
+                        return null;
+                    }
+                }).collect(Collectors.toList()));
     }
 
-    public Optional<List<E>> convertToEntities(List<D> dtos) throws CustomConverterException {
-        List<E> entities = new ArrayList<>();
-        dtos.forEach(dto -> {
-            try{
-                E e = convertToEntity(dto).get();
-                entities.add(e);
-            } catch (CustomConverterException ex) {
-                ex.printStackTrace();
-            }
-
-        });
-        return Optional.of(entities);
+    public Optional<List<E>> convertToEntities(List<D> dtos) {
+        return Optional.of(
+                dtos.stream().map(dto -> {
+                    try {
+                        Optional<E> entity = convertToEntity(dto);
+                        return entity.get();
+                    } catch (CustomConverterException ex) {
+                        ex.printStackTrace();
+                        return null;
+                    }
+                }).collect(Collectors.toList()));
     }
 }

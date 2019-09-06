@@ -20,7 +20,6 @@ import com.example.security.repositories.UserRepository;
 import com.example.security.services.IRoleService;
 import com.example.security.services.IUserService;
 import com.example.security.tools.ITools;
-import org.jose4j.lang.JoseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -62,6 +61,8 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
     @Autowired
     private IRoleService roleService;
 
+
+    //toDo mak builder
     @Override
     public void getDataTest() {
         Role userRole = new Role();
@@ -298,16 +299,11 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
 
     @Override
     public List<UserDTO> getUsers() {
-        try {
-            List<UserDTO> userDTOS = (List<UserDTO> )superModelMapper.convertToDTOs(userRepository.findAll()).get();
-            userDTOS.forEach(u -> {
-                u.setFlattenRoles(buildFlattenRoles(roleRepository.findByUsersEmail(u.getEmail())));
-            });
-            return userDTOS;
-        } catch (CustomConverterException ex) {
-            ex.printStackTrace();
-            return null;
-        }
+        List<UserDTO> userDTOS = (List<UserDTO>) superModelMapper.convertToDTOs(userRepository.findAll()).get();
+        userDTOS.forEach(u -> {
+            u.setFlattenRoles(buildFlattenRoles(roleRepository.findByUsersEmail(u.getEmail())));
+        });
+        return userDTOS;
     }
 
     @Override
