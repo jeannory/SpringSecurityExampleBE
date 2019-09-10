@@ -5,6 +5,13 @@ import com.example.security.entities.Role;
 import com.example.security.entities.User;
 import com.example.security.enums.Gender;
 import com.example.security.enums.Status;
+import org.jose4j.jwk.JsonWebKey;
+import org.jose4j.jwk.RsaJsonWebKey;
+import org.jose4j.jwk.RsaJwkGenerator;
+import org.jose4j.jws.AlgorithmIdentifiers;
+import org.jose4j.jws.JsonWebSignature;
+import org.jose4j.jwt.JwtClaims;
+import org.jose4j.lang.JoseException;
 import org.mockito.Mockito;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,6 +20,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static com.example.security.contants.Constants.AUTHORITIES_KEY;
+import static com.example.security.contants.Constants.DOMAIN;
 
 public class BuilderUtils {
 
@@ -37,26 +47,13 @@ public class BuilderUtils {
 
     public static User buildUser(
             Long id, String email, String password, Gender gender, String firstName, String lastName, String phoneNumber,
-            String adress, String zip, String city, String deliveryInformation, Status status, List<String> strings
+            String adress, String zip, String city, String deliveryInformation, Status status, List<List<String>> strings
     ) {
         final User user = buildUser(id, email, password, gender, firstName, lastName, phoneNumber, adress, zip, city, deliveryInformation, status);
         user.setRoles(buildRoles(strings));
         return user;
     }
 
-    private static Set<Role> buildRoles(List<String> strings) {
-        return strings.stream().map(str -> {
-                    Role role = buildRole(str);
-                    return role;
-                }
-        ).collect(Collectors.toCollection(HashSet::new));
-    }
-
-    private static Role buildRole(String str) {
-        final Role role = new Role();
-        role.setName(str);
-        return role;
-    }
 
     public static HashSet<GrantedAuthority> buildAuthorities(List<String> strings) {
         return strings.stream().map(str -> {
@@ -93,5 +90,53 @@ public class BuilderUtils {
         Mockito.when(userDetails.getPassword()).thenReturn(password);
         Mockito.when(userDetails.getAuthorities()).thenReturn(authorities);
         return userDetails;
+    }
+
+    public static Set<Role> buildRoles(List<List<String>> strings) {
+        return strings.stream().map(str -> {
+                    Role role = buildRole(str);
+                    return role;
+                }
+        ).collect(Collectors.toCollection(HashSet::new));
+    }
+
+    private static Role buildRole(List<String> strings) {
+        final Role role = new Role();
+        if(strings.get(0)!=null) {
+            role.setId(Long.valueOf(strings.get(0)));
+        }
+        role.setName(strings.get(1));
+        return role;
+    }
+
+    public static JsonWebKey buildJsonWebKey(int kid)throws JoseException{
+        final JsonWebKey jsonWebKey = RsaJwkGenerator.generateJwk(2048);
+        jsonWebKey.setKeyId(String.valueOf(kid));
+        return jsonWebKey;
+    }
+
+    public static JsonWebSignature buildJsonWebSignature
+            (
+            String email,
+            List<String> rolesString,
+            int kid,
+            RsaJsonWebKey rsaJsonWebKey
+            ) throws JoseException {
+
+        final JwtClaims jwtClaims = new JwtClaims();
+        jwtClaims.setIssuer(DOMAIN);
+        jwtClaims.setExpirationTimeMinutesInTheFuture(120);
+        jwtClaims.setGeneratedJwtId();
+        jwtClaims.setIssuedAtToNow();
+        jwtClaims.setNotBeforeMinutesInThePast(2);
+        jwtClaims.setSubject(email);
+        jwtClaims.setStringListClaim(AUTHORITIES_KEY, rolesString);
+        final JsonWebSignature jsonWebSignature = new JsonWebSignature();
+        jsonWebSignature.setPayload(jwtClaims.toJson());
+        jsonWebSignature.setKeyIdHeaderValue(rsaJsonWebKey.getKeyId());
+        jsonWebSignature.setKey(rsaJsonWebKey.getPrivateKey());
+        jsonWebSignature.setAlgorithmHeaderValue(AlgorithmIdentifiers.RSA_USING_SHA256);
+
+        return jsonWebSignature;
     }
 }

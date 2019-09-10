@@ -15,15 +15,18 @@ import java.io.IOException;
 import java.util.List;
 
 public interface IUserService {
+
     void getDataTest();
-    User findByEmail(String email);
+
     UserDTO findUserDTOByEmail(String email);
-    User selectMyUserByEmail(String login);
-    TokenUtility getTokenUtility(String token)throws MalformedClaimException, IOException, InvalidJwtException;
-    Token validateConnection(Credential credential);
-    Token generateUser(UserDTO userDTOEntry);
+
+    Token generateUser(UserDTO userDTOEntry)throws CustomConverterException;
+
     UserDTO setUser(UserDTO userDTO);
-    List<UserDTO> getUsers();
+
+    List<UserDTO> getUsers() throws CustomConverterException;
+
     List<Gender> getGenders();
-    List<UserDTO> changeUserSatus(UserDTO userDTO) throws CustomConverterException;
+
+    List<UserDTO> changeUserSatus(UserDTO userDTO);
 }

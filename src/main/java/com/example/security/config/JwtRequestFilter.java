@@ -33,6 +33,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Autowired
     private UserDetailsService userDetailsService;
 
+    @Autowired
+    private AuthProvider authProvider;
+
+    @Autowired
+    private TokenUtilityProvider tokenUtilityProvider;
+
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
         try {
@@ -40,13 +46,16 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             TokenUtility tokenUtility = validateTokenUtility(token);
             if (tokenUtility.isValidateToken()) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(tokenUtility.getEmail());
-                List<SimpleGrantedAuthority> simpleGrantedAuthorities
-                        = tokenUtility.getRoles().stream()
-                        .map(role -> new SimpleGrantedAuthority(AUTHORITY_PREFIX + role))
-                        .collect(Collectors.toCollection(ArrayList::new));
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, simpleGrantedAuthorities);
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                //see junit test
+                if(userDetails!=null){
+                    List<SimpleGrantedAuthority> simpleGrantedAuthorities
+                            = tokenUtility.getRoles().stream()
+                            .map(role -> new SimpleGrantedAuthority(AUTHORITY_PREFIX + role))
+                            .collect(Collectors.toCollection(ArrayList::new));
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, simpleGrantedAuthorities);
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             }
         } catch (CustomNoHeaderException ex) {
             //NPE or if token not found on header no status to return
@@ -61,7 +70,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             final String requestTokenHeader = httpServletRequest.getHeader(HEADER_STRING);
             String token = requestTokenHeader.replace(TOKEN_PREFIX, "");
             System.out.println("token : " + token);
-            if(token==null){
+            if (token == null) {
                 throw new CustomNoHeaderException("token not found on header");
             }
             return token;
@@ -71,16 +80,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
 
     private TokenUtility validateTokenUtility(String token) throws IOException {
-        try {
-            return userService.getTokenUtility(token);
-        } catch (MalformedClaimException ex) {
-            //todo check if this exception is handled in TokenUtilityProvider.getTokenUtility(token) with junit tests (this exception should never happen)
-            ex.printStackTrace();
-            return null;
-        } catch (InvalidJwtException ex) {
-            //todo check if this exception is handled in TokenUtilityProvider.getTokenUtility(token) with junit tests (this exception should never happen)
-            ex.printStackTrace();
-            return null;
-        }
+        return tokenUtilityProvider.getTokenUtility(token);
     }
 }

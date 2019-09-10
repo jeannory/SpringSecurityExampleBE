@@ -95,7 +95,7 @@ public class RoleServiceImpl implements IRoleService {
 
     @Transactional
     @Override
-    public List<UserDTO> putUserRoles(String email, List<RoleDTO> roleDTOS) {
+    public List<UserDTO> putUserRoles(String email, List<RoleDTO> roleDTOS) throws CustomConverterException{
         User user = userRepository.findByEmail(email);
         user.setRoles(new HashSet<>((List<Role>) superModelMapper.convertToEntities(roleDTOS).get()));
         userRepository.save(user);

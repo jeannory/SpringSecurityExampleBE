@@ -10,10 +10,8 @@ import com.example.security.entities.User;
 import com.example.security.enums.Gender;
 import com.example.security.enums.Status;
 import com.example.security.exceptions.CustomConverterException;
-import com.example.security.exceptions.CustomEntityException;
 import com.example.security.models.Credential;
 import com.example.security.models.Token;
-import com.example.security.models.TokenUtility;
 import com.example.security.repositories.RoleRepository;
 import com.example.security.repositories.SpaceRepository;
 import com.example.security.repositories.UserRepository;
@@ -21,14 +19,12 @@ import com.example.security.services.IRoleService;
 import com.example.security.services.IUserService;
 import com.example.security.tools.ITools;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -139,7 +135,10 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         try {
             User user = manageSelectMyUserByEmailException(username);
-            return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), getAuthority(user));
+            Set<SimpleGrantedAuthority> simpleGrantedAuthorities = roleService.findByUsersEmail(user.getEmail()).stream().map(role-> {
+                return new SimpleGrantedAuthority(AUTHORITY_PREFIX + role.getName());
+            }).collect(Collectors.toCollection(HashSet::new));
+            return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), simpleGrantedAuthorities);
         } catch (UsernameNotFoundException ex) {
             ex.printStackTrace();
             return null;
@@ -148,137 +147,76 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
 
     //only use with method loadUserByUsername
     private User manageSelectMyUserByEmailException(String username) {
-        try {
-            User user = userRepository.selectMyUserByEmail(username);
-            if (
-                    user == null ||
-                            user.getId() == null ||
-                            user.getEmail() == null ||
-                            user.getPassword() == null ||
-                            user.getRoles() == null
-            ) {
-                throw new UsernameNotFoundException("Invalid user");
-            }
-            return user;
-        } catch (NullPointerException ex) {
-            throw new UsernameNotFoundException("Invalid user");
-        }
-    }
-
-    private Set<SimpleGrantedAuthority> getAuthority(User user) {
-        Set<SimpleGrantedAuthority> simpleGrantedAuthorities = new HashSet<>();
-        try {
-            List<Role> roles = roleService.findByUsersEmail(user.getEmail());
-            roles.forEach(role -> {
-                simpleGrantedAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_PREFIX + role.getName()));
-            });
-        } catch (Exception ex) {
-
-        }
-        return simpleGrantedAuthorities;
-    }
-
-    @Override
-    public User findByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
-
-    private User manageFindByEmailException(String username) throws CustomEntityException {
-        User user = null;
-        user = userRepository.findByEmail(username);
+        User user = userRepository.selectMyUserByEmail(username);
         if (
                 user == null ||
                         user.getId() == null ||
-                        user.getEmail() == null
+                        user.getEmail() == null ||
+                        user.getPassword() == null ||
+                        user.getRoles() == null
         ) {
-            throw new CustomEntityException("Invalid user");
+            throw new UsernameNotFoundException("Invalid user");
         }
         return user;
     }
 
     @Override
     public UserDTO findUserDTOByEmail(String email) {
-        User user = null;
-        //to check
         try {
-            user = managerFindByEmailException(email);
-        } catch (CustomEntityException ex) {
-            ex.printStackTrace();
-        }
-
-        try {
-            UserDTO userDTO = (UserDTO) superModelMapper.convertToDTO(user).get();
-            return userDTO;
+            User user = userRepository.findByEmail(email);
+            if(user==null){
+                return null;
+            }
+            return (UserDTO) superModelMapper.convertToDTO(user).get();
         } catch (CustomConverterException ex) {
+            ex.printStackTrace();
+            return null;
+        }catch(NoSuchElementException ex) {
             ex.printStackTrace();
             return null;
         }
     }
 
-    private User managerFindByEmailException(String email) throws CustomEntityException {
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            throw new CustomEntityException("Invalid user");
-        }
-        return user;
-    }
 
-    @Override
-    public User selectMyUserByEmail(String email) {
-        return userRepository.selectMyUserByEmail(email);
-    }
-
-    @Override
-    public Token validateConnection(Credential credential) {
-        Token token = authProvider.validateConnection(credential);
-        return token;
-    }
-
-    @Override
-    public TokenUtility getTokenUtility(String token)  {
-        return tokenUtilityProvider.getTokenUtility(token);
-    }
-
-    //register new user
     @Transactional
-    private Credential validateNewUser(UserDTO userDTOEntry) {
-        try {
-            String password = getStringSha3(userDTOEntry.getPassword());
-            userDTOEntry.setPassword(password);
-            User user = (User) (superModelMapper.convertToEntity(userDTOEntry)).get();
-            user.setRoles(roleService.getUserRoleSet());
-            user.setStatus(Status.ACTIVE);
-            userRepository.save(user);
-
-            Space space = new Space();
-            space.setName("Espace de " + user.getEmail());
-            space.setUser(user);
-            spaceRepository.save(space);
-
-            Credential credential = new Credential();
-            credential.setEmail(userDTOEntry.getEmail());
-            credential.setPassword(userDTOEntry.getPassword());
-            return credential;
-
-        } catch (Exception ex) {
-            throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"
-            );
-            //toDo junit test
-        }
-    }
-
     @Override
-    public Token generateUser(UserDTO userDTOEntry){
-            Credential credential = validateNewUser(userDTOEntry);
-            Token token= validateConnection(credential);
-            return token;
+    public Token generateUser(UserDTO userDTOEntry) throws CustomConverterException {
+        Set<Role> roles = roleService.getUserRoleSet();
+//        if(
+//                userDTOEntry==null ||
+//                        userDTOEntry.getEmail()==null ||
+//                        userDTOEntry.getPassword()==null ||
+//                        userDTOEntry.getFirstName()==null ||
+//                        userDTOEntry.getLastName()==null ||
+//                        roles==null ||
+//                        roles.isEmpty()
+//        ){
+//            return null;
+//        }
+        userDTOEntry.setPassword(getStringSha3(userDTOEntry.getPassword()));
+        User user = (User) (superModelMapper.convertToEntity(userDTOEntry)).get();
+        user.setRoles(roles);
+        user.setStatus(Status.ACTIVE);
+        userRepository.save(user);
+        Space space = new Space();
+        space.setName("Espace de " + user.getEmail());
+        space.setUser(user);
+        spaceRepository.save(space);
+        //check if @transactionnal failed
+//        if(user.getId()==null||space.getId()==null){
+//            return null;
+//        }else{
+        Credential credential = new Credential();
+        credential.setEmail(userDTOEntry.getEmail());
+        credential.setPassword(userDTOEntry.getPassword());
+        return authProvider.validateConnection(credential);
+//        }
     }
 
     @Override
     @Transactional
     public UserDTO setUser(UserDTO userDTO) {
-        User user = findByEmail(userDTO.getEmail());
+        User user = userRepository.findByEmail(userDTO.getEmail());
         user.setGender(userDTO.getGender());
         user.setFirstName(userDTO.getFirstName());
         user.setLastName(userDTO.getLastName());
@@ -307,7 +245,7 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
     }
 
     @Override
-    public List<Gender> getGenders(){
+    public List<Gender> getGenders() {
         return Arrays.asList(Gender.Monsieur, Gender.Madame);
     }
 
@@ -324,7 +262,7 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
 
     @Transactional
     @Override
-    public List<UserDTO> changeUserSatus(UserDTO userDTO) throws CustomConverterException {
+    public List<UserDTO> changeUserSatus(UserDTO userDTO) {
         Optional<User> user = userRepository.findById(userDTO.getId());
         if (userDTO.getStatus() == Status.ACTIVE) {
             user.get().setStatus(Status.INACTIVE);

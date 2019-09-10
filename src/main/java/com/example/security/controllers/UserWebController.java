@@ -1,5 +1,6 @@
 package com.example.security.controllers;
 
+import com.example.security.config.AuthProvider;
 import com.example.security.dtos.RoleDTO;
 import com.example.security.dtos.UserDTO;
 import com.example.security.enums.Gender;
@@ -27,6 +28,9 @@ public class UserWebController extends SuperController {
     @Autowired
     private IRoleService roleService;
 
+    @Autowired
+    private AuthProvider authProvider;
+
     //http://localhost:8080/api/UserWebController/getDataTest
     @RequestMapping(path = "/getDataTest", method = RequestMethod.GET)
     public String getDataTest(){
@@ -41,7 +45,7 @@ public class UserWebController extends SuperController {
     }
 
     private Token validateToken(Credential credential) {
-        Token token = userService.validateConnection(credential);
+        Token token = authProvider.validateConnection(credential);
         if (token == null) {
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED, "Unauthorized"
@@ -62,7 +66,7 @@ public class UserWebController extends SuperController {
 
     //http://localhost:8080/api/UserWebController/registerUser
     @RequestMapping(value = "/registerUser", method = RequestMethod.POST)
-    public Token registerUser(@RequestBody UserDTO userDTOEntry) {
+    public Token registerUser(@RequestBody UserDTO userDTOEntry) throws CustomConverterException{
         try {
             Token token = userService.generateUser(userDTOEntry);
             return token;
@@ -92,7 +96,7 @@ public class UserWebController extends SuperController {
     //http://localhost:8080/api/UserWebController/getUsers
     @Secured({AUTHORITY_PREFIX+ADMIN})
     @RequestMapping(path = "/getUsers", method = RequestMethod.GET)
-    public List<UserDTO> getUsers() {
+    public List<UserDTO> getUsers() throws CustomConverterException{
         List<UserDTO> userDTOS = userService.getUsers();
         userDTOS.forEach(u -> {
             u.setPassword(null);
