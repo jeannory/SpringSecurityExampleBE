@@ -13,6 +13,7 @@ import com.example.security.repositories.SpaceRepository;
 import com.example.security.repositories.UserRepository;
 import com.example.security.singleton.SingletonBean;
 import com.example.security.tools.ITools;
+import com.example.security.utils.BuilderUtils;
 import org.jose4j.jws.JsonWebSignature;
 import org.junit.Assert;
 import org.junit.Before;

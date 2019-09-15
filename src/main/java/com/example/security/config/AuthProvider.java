@@ -3,6 +3,7 @@ package com.example.security.config;
 import com.example.security.entities.Role;
 import com.example.security.entities.User;
 import com.example.security.exceptions.CustomJoseException;
+import com.example.security.exceptions.CustomTokenException;
 import com.example.security.models.Credential;
 import com.example.security.models.Token;
 import com.example.security.repositories.RoleRepository;
@@ -52,6 +53,9 @@ public class AuthProvider implements ITools {
             } catch (CustomJoseException ex) {
                 ex.printStackTrace();
                 return null;
+            } catch(CustomTokenException ex){
+                ex.printStackTrace();
+                return null;
             }
         }
         return null;
@@ -60,6 +64,9 @@ public class AuthProvider implements ITools {
     private String generateJwt(String email){
         try {
             List<Role> roles = roleRepository.findByUsersEmail(email);
+            if(roles.isEmpty()||roles==null){
+                throw new CustomTokenException("token must contain at least 1 role");
+            }
             List<String> rolesString = roles.stream().map(
                     role->{
                         return role.getName();
@@ -85,6 +92,8 @@ public class AuthProvider implements ITools {
 
         } catch (JoseException ex) {
             throw new CustomJoseException("Failed to generate token");
+        }catch (NullPointerException ex){
+            throw new CustomTokenException("token must contain at least 1 role");
         }
     }
 

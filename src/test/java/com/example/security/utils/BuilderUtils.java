@@ -1,5 +1,6 @@
-package com.example.security.services.impl;
+package com.example.security.utils;
 
+import com.example.security.dtos.RoleDTO;
 import com.example.security.dtos.UserDTO;
 import com.example.security.entities.Role;
 import com.example.security.entities.User;
@@ -100,13 +101,22 @@ public class BuilderUtils {
         ).collect(Collectors.toCollection(HashSet::new));
     }
 
-    private static Role buildRole(List<String> strings) {
+    public static Role buildRole(List<String> strings) {
         final Role role = new Role();
         if(strings.get(0)!=null) {
             role.setId(Long.valueOf(strings.get(0)));
         }
         role.setName(strings.get(1));
         return role;
+    }
+
+    public static RoleDTO buildRoleDTO(List<String> strings) {
+        final RoleDTO roleDTO= new RoleDTO();
+        if(strings.get(0)!=null) {
+            roleDTO.setId(Long.valueOf(strings.get(0)));
+        }
+        roleDTO.setName(strings.get(1));
+        return roleDTO;
     }
 
     public static JsonWebKey buildJsonWebKey(int kid)throws JoseException{
