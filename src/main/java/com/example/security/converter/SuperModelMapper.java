@@ -8,35 +8,51 @@ import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-//if conversion failed should return null
-//already manage for list
-//need to be manage for simple object in service
 @Service
 public class SuperModelMapper<E extends SuperEntity, D extends SuperDTO> {
 
     private static ModelMapper modelMapper;
 
-    public Optional<D> convertToDTO(E entity) throws CustomConverterException {
+    public Optional<D> convertToDTO(E entity1) {
         modelMapper = new ModelMapper();
         try {
-            D dto = modelMapper.map(entity, (Type) entity.getDTOClass());
+            E entity2 = validateEntity(entity1);
+            D dto = modelMapper.map(entity2, (Type) entity2.getDTOClass());
             return Optional.of(dto);
-        } catch (Exception ex) {
-            throw new CustomConverterException("Conversion failed");
+        } catch (CustomConverterException ex) {
+            ex.printStackTrace();
+            return null;
         }
     }
 
-    public Optional<E> convertToEntity(D dto) throws CustomConverterException {
+    private E validateEntity(E entity){
+        if(entity==null){
+            throw new CustomConverterException("Entity cannot be null");
+        }
+        return entity;
+    }
+
+    public Optional<E> convertToEntity(D dto1) {
         modelMapper = new ModelMapper();
         try {
-            E entiy = modelMapper.map(dto, (Type) dto.getEntityClass());
+            D dto2 = validateDTO(dto1);
+            E entiy = modelMapper.map(dto2, (Type) dto2.getEntityClass());
             return Optional.of(entiy);
-        } catch (Exception ex) {
-            throw new CustomConverterException("Conversion failed");
+        } catch (CustomConverterException ex) {
+            ex.printStackTrace();
+            return null;
         }
+    }
+
+    private D validateDTO(D dto){
+            if(dto==null){
+                throw new CustomConverterException("Dto cannot be null");
+            }
+            return dto;
     }
 
     public Optional<List<D>> convertToDTOs(List<E> entities) {
@@ -49,7 +65,7 @@ public class SuperModelMapper<E extends SuperEntity, D extends SuperDTO> {
                         ex.printStackTrace();
                         return null;
                     }
-                }).collect(Collectors.toList()));
+                }).collect(Collectors.toList()).stream().filter(Objects::nonNull).collect(Collectors.toList()));
     }
 
     public Optional<List<E>> convertToEntities(List<D> dtos) {
@@ -62,6 +78,6 @@ public class SuperModelMapper<E extends SuperEntity, D extends SuperDTO> {
                         ex.printStackTrace();
                         return null;
                     }
-                }).collect(Collectors.toList()));
+                }).collect(Collectors.toList()).stream().filter(Objects::nonNull).collect(Collectors.toList()));
     }
 }

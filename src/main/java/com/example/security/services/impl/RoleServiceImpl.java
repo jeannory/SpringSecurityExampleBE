@@ -41,46 +41,57 @@ public class RoleServiceImpl implements IRoleService {
     }
 
     @Override
-    public Role findByName(String name) {
-        return roleRepository.findByName(name);
+    public List<Role> findByUsersEmail(String userEmail) {
+        List<Role> role= roleRepository.findByUsersEmail(userEmail);
+        if(role==null){
+            return Collections.emptyList();
+        }
+        return role;
     }
 
     @Override
-    public List<Role> findByUsersEmail(String userEmail) {
-        return roleRepository.findByUsersEmail(userEmail);
-
-    }
-
     public Role getUserRole() {
-        return roleRepository.findByName(USER);
+        try {
+            return roleRepository.findByName(USER);
+        }catch(NullPointerException ex){
+            ex.printStackTrace();
+            return null;
+        }
     }
 
+    @Override
     public Role getManagerRole() {
+        try{
         return roleRepository.findByName(MANAGER);
+        }catch(NullPointerException ex){
+            ex.printStackTrace();
+            return null;
+        }
     }
 
+    @Override
     public Role getAdminRole() {
+        try{
         return roleRepository.findByName(ADMIN);
+        }catch(NullPointerException ex){
+            ex.printStackTrace();
+            return null;
+        }
     }
 
     @Override
     public Set<Role> getUserRoleSet() {
-        return Stream.of(getUserRole()).collect(Collectors.toCollection(HashSet::new));
+        return Stream.of(getUserRole()).collect(Collectors.toCollection(HashSet::new)).stream().filter(Objects::nonNull).collect(Collectors.toSet());
     }
 
     @Override
     public Set<Role> getManagerRoleSet() {
-        return Stream.of(getUserRole(), getManagerRole()).collect(Collectors.toCollection(HashSet::new));
+        return Stream.of(getUserRole(), getManagerRole()).collect(Collectors.toCollection(HashSet::new)).stream().filter(Objects::nonNull).collect(Collectors.toSet());
     }
 
     @Override
     public Set<Role> getAdminRoleSet() {
-        return Stream.of(getUserRole(), getManagerRole(), getAdminRole()).collect(Collectors.toCollection(HashSet::new));
-    }
-
-    @Override
-    public Set<RoleDTO> getRoleDtosSet(String userEmail){
-        return ((List<RoleDTO>) superModelMapper.convertToDTOs(findByUsersEmail(userEmail)).get()).stream().collect(Collectors.toCollection(HashSet::new));
+        return Stream.of(getUserRole(), getManagerRole(), getAdminRole()).collect(Collectors.toCollection(HashSet::new)).stream().filter(Objects::nonNull).collect(Collectors.toSet());
     }
 
     @Override

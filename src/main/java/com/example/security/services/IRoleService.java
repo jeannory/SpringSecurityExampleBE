@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 
 public interface IRoleService {
-    Role findByName(String name);
     List<Role> findByUsersEmail(String userEmail);
     Role getUserRole();
     Role getManagerRole();
@@ -17,7 +16,6 @@ public interface IRoleService {
     Set<Role> getUserRoleSet();
     Set<Role> getManagerRoleSet();
     Set<Role> getAdminRoleSet();
-    Set<RoleDTO> getRoleDtosSet(String userEmail);
     List<RoleDTO> getRoleDtosList(String userEmail);
     List<RoleDTO> getAdminRoleDTOSet();
     List<UserDTO> putUserRoles(String email, List<RoleDTO> roleDTOS) throws CustomConverterException;
