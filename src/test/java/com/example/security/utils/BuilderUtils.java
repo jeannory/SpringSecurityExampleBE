@@ -6,6 +6,9 @@ import com.example.security.entities.Role;
 import com.example.security.entities.User;
 import com.example.security.enums.Gender;
 import com.example.security.enums.Status;
+import com.example.security.exceptions.CustomJwtException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.jwk.RsaJsonWebKey;
 import org.jose4j.jwk.RsaJwkGenerator;
@@ -17,6 +20,7 @@ import org.mockito.Mockito;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -67,7 +71,7 @@ public class BuilderUtils {
             Long id, String email, String password, Gender gender, String firstName, String lastName, String phoneNumber, String adress,
             String zip, String city, String deliveryInformation, Long SpaceId, String flattenRoles, Status status) {
 
-        UserDTO userDTO = new UserDTO();
+        final UserDTO userDTO = new UserDTO();
         userDTO.setId(id);
         userDTO.setEmail(email);
         userDTO.setPassword(password);
@@ -148,5 +152,22 @@ public class BuilderUtils {
         jsonWebSignature.setAlgorithmHeaderValue(AlgorithmIdentifiers.RSA_USING_SHA256);
 
         return jsonWebSignature;
+    }
+
+    public static String getStringFromJwtNode(String token, int indice, String nodeName) {
+        try {
+            String[] tokenTab = token.split("\\.");
+            String headerEncoded = tokenTab[indice];
+            byte[] decodeBytesHeader = Base64.getUrlDecoder().decode(headerEncoded);
+            String decodeHeader = new String(decodeBytesHeader);
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode rootNode;
+            rootNode = objectMapper.readValue(decodeHeader, JsonNode.class);
+            JsonNode node = rootNode.path(nodeName);
+            String kid = node.asText();
+            return kid;
+        } catch (Exception ex) {
+            throw new CustomJwtException("failed to get infos from the token");
+        }
     }
 }

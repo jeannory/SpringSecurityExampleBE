@@ -17,6 +17,6 @@ public interface IRoleService {
     Set<Role> getManagerRoleSet();
     Set<Role> getAdminRoleSet();
     List<RoleDTO> getRoleDtosList(String userEmail);
-    List<RoleDTO> getAdminRoleDTOSet();
+    List<RoleDTO> getAdminRoleDTOS();
     List<UserDTO> putUserRoles(String email, List<RoleDTO> roleDTOS) throws CustomConverterException;
 }

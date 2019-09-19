@@ -29,8 +29,8 @@ public class SuperModelMapper<E extends SuperEntity, D extends SuperDTO> {
         }
     }
 
-    private E validateEntity(E entity){
-        if(entity==null){
+    private E validateEntity(E entity) {
+        if (entity == null) {
             throw new CustomConverterException("Entity cannot be null");
         }
         return entity;
@@ -48,36 +48,34 @@ public class SuperModelMapper<E extends SuperEntity, D extends SuperDTO> {
         }
     }
 
-    private D validateDTO(D dto){
-            if(dto==null){
-                throw new CustomConverterException("Dto cannot be null");
+    private D validateDTO(D dto) {
+        if (dto == null) {
+            throw new CustomConverterException("Dto cannot be null");
+        }
+        return dto;
+    }
+
+    public List<D> convertToDTOs(List<E> entities) {
+        return entities.stream().map(entity -> {
+            try {
+                Optional<D> dto = convertToDTO(entity);
+                return dto.get();
+            } catch (CustomConverterException ex) {
+                ex.printStackTrace();
+                return null;
             }
-            return dto;
+        }).collect(Collectors.toList()).stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    public Optional<List<D>> convertToDTOs(List<E> entities) {
-        return Optional.of(
-                entities.stream().map(entity -> {
-                    try {
-                        Optional<D> dto = convertToDTO(entity);
-                        return dto.get();
-                    } catch (CustomConverterException ex) {
-                        ex.printStackTrace();
-                        return null;
-                    }
-                }).collect(Collectors.toList()).stream().filter(Objects::nonNull).collect(Collectors.toList()));
-    }
-
-    public Optional<List<E>> convertToEntities(List<D> dtos) {
-        return Optional.of(
-                dtos.stream().map(dto -> {
-                    try {
-                        Optional<E> entity = convertToEntity(dto);
-                        return entity.get();
-                    } catch (CustomConverterException ex) {
-                        ex.printStackTrace();
-                        return null;
-                    }
-                }).collect(Collectors.toList()).stream().filter(Objects::nonNull).collect(Collectors.toList()));
+    public List<E> convertToEntities(List<D> dtos) {
+        return dtos.stream().map(dto -> {
+            try {
+                Optional<E> entity = convertToEntity(dto);
+                return entity.get();
+            } catch (CustomConverterException ex) {
+                ex.printStackTrace();
+                return null;
+            }
+        }).collect(Collectors.toList()).stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
 }

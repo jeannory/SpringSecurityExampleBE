@@ -237,7 +237,7 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
 
     @Override
     public List<UserDTO> getUsers() {
-        List<UserDTO> userDTOS = (List<UserDTO>) superModelMapper.convertToDTOs(userRepository.findAll()).get();
+        List<UserDTO> userDTOS = (List<UserDTO>) superModelMapper.convertToDTOs(userRepository.findAll());
         userDTOS.forEach(u -> {
             u.setFlattenRoles(buildFlattenRoles(roleRepository.findByUsersEmail(u.getEmail())));
         });
@@ -270,6 +270,6 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
             user.get().setStatus(Status.ACTIVE);
         }
         userRepository.save(user.get());
-        return (List<UserDTO>) superModelMapper.convertToDTOs(userRepository.findAll()).get();
+        return (List<UserDTO>) superModelMapper.convertToDTOs(userRepository.findAll());
     }
 }

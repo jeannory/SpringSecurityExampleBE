@@ -268,7 +268,7 @@ public class UserServiceImplTest {
                 BuilderUtils.buildUserDTO(2L, "jeanne@jeanne.com", "1234", Gender.Monsieur, "Jeanne", "Leroy", "0101010101",
                         "9 rue du roi", "75018", "Paris", "9ème étage", null, "USER, MANAGER, ADMIN", Status.ACTIVE)
         );
-        Mockito.when(superModelMapper.convertToDTOs(Mockito.eq(users))).thenReturn(Optional.of(userDTOS));
+        Mockito.when(superModelMapper.convertToDTOs(Mockito.eq(users))).thenReturn(userDTOS);
 
         //when
         List<UserDTO> result = userService.changeUserSatus(userDTO);

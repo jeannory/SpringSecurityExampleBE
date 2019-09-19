@@ -96,20 +96,24 @@ public class RoleServiceImpl implements IRoleService {
 
     @Override
     public List<RoleDTO> getRoleDtosList(String userEmail){
-        return (List<RoleDTO>) superModelMapper.convertToDTOs(findByUsersEmail(userEmail)).get();
+        return superModelMapper.convertToDTOs(findByUsersEmail(userEmail));
     }
 
     @Override
-    public List<RoleDTO> getAdminRoleDTOSet() {
-        return (List<RoleDTO>) superModelMapper.convertToDTOs(Stream.of(getUserRole(), getManagerRole(), getAdminRole()).collect(Collectors.toList())).get();
+    public List<RoleDTO> getAdminRoleDTOS() {
+        return superModelMapper.convertToDTOs(Stream.of(getUserRole(), getManagerRole(), getAdminRole()).collect(Collectors.toList()));
     }
 
     @Transactional
     @Override
     public List<UserDTO> putUserRoles(String email, List<RoleDTO> roleDTOS) throws CustomConverterException{
         User user = userRepository.findByEmail(email);
-        user.setRoles(new HashSet<>((List<Role>) superModelMapper.convertToEntities(roleDTOS).get()));
-        userRepository.save(user);
-        return userService.getUsers();
+        List<Role> roles = superModelMapper.convertToEntities(roleDTOS);
+        user.setRoles(new HashSet<>(roles));
+        user = userRepository.save(user);
+        if(user.getRoles().size()==roles.size()){
+            return userService.getUsers();
+        }
+        return Collections.emptyList();
     }
 }

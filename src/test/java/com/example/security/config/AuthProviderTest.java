@@ -59,7 +59,7 @@ public class AuthProviderTest {
         final User user = BuilderUtils.buildUser(1L, "jean@jean.com", hashPassword, Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Collections.singletonList(Arrays.asList("1", "USER")));
         Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);
-        final List<Role> roles1 = user.getRoles().stream().collect(Collectors.toCollection(ArrayList::new));
+        List<Role> roles1 = user.getRoles().stream().collect(Collectors.toCollection(ArrayList::new));
         Mockito.when(roleRepository.findByUsersEmail("jean@jean.com")).thenReturn(roles1);
         List<String> rolesString = roles1.stream().map(
                 role -> {
@@ -77,21 +77,21 @@ public class AuthProviderTest {
         //when
         final Token result = authProvider.validateConnection(credential);
         final String token1 = result.getToken();
-        final String kid1 = getStringFromJwtNode(result.getToken(), 0, "kid");
-        final String subject1 = getStringFromJwtNode(result.getToken(), 1, "sub");
-        final String issuer1 = getStringFromJwtNode(result.getToken(), 1, "iss");
-        final String tokenId1 = getStringFromJwtNode(result.getToken(), 1, "jti");
-        final String expiration1 = getStringFromJwtNode(result.getToken(), 1, "exp");
+        final String kid1 = BuilderUtils.getStringFromJwtNode(result.getToken(), 0, "kid");
+        final String subject1 = BuilderUtils.getStringFromJwtNode(result.getToken(), 1, "sub");
+        final String issuer1 = BuilderUtils.getStringFromJwtNode(result.getToken(), 1, "iss");
+        final String tokenId1 = BuilderUtils.getStringFromJwtNode(result.getToken(), 1, "jti");
+        final String expiration1 = BuilderUtils.getStringFromJwtNode(result.getToken(), 1, "exp");
 
         //manually create a new jsonWebSignature to compare 2 tokens
         final JsonWebSignature jsonWebSignature = BuilderUtils.buildJsonWebSignature("jean@jean.com",
                 rolesString, kidRandom, (RsaJsonWebKey) jsonWebKeys.get(kidRandom));
         final String token2 = jsonWebSignature.getCompactSerialization();
-        final String kid2 = getStringFromJwtNode(token2, 0, "kid");
-        final String subject2 = getStringFromJwtNode(token2, 1, "sub");
-        final String issuer2 = getStringFromJwtNode(token2, 1, "iss");
-        final String tokenId2 = getStringFromJwtNode(token2, 1, "jti");
-        final String expiration2 = getStringFromJwtNode(token2, 1, "exp");
+        final String kid2 = BuilderUtils.getStringFromJwtNode(token2, 0, "kid");
+        final String subject2 = BuilderUtils.getStringFromJwtNode(token2, 1, "sub");
+        final String issuer2 = BuilderUtils.getStringFromJwtNode(token2, 1, "iss");
+        final String tokenId2 = BuilderUtils.getStringFromJwtNode(token2, 1, "jti");
+        final String expiration2 = BuilderUtils.getStringFromJwtNode(token2, 1, "exp");
 
         //then
         Assert.assertTrue(Integer.valueOf(kid1)<=2);
@@ -180,7 +180,7 @@ public class AuthProviderTest {
         final User user = BuilderUtils.buildUser(1L, "jean@jean.com", hashPassword, Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Collections.singletonList(Arrays.asList("1", "USER")));
         Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);
-        final List<Role> roles1 = new ArrayList<>();
+        List<Role> roles1 = new ArrayList<>();
         Mockito.when(roleRepository.findByUsersEmail("jean@jean.com")).thenReturn(roles1);
 
         //when
@@ -201,7 +201,7 @@ public class AuthProviderTest {
         final User user = BuilderUtils.buildUser(1L, "jean@jean.com", hashPassword, Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Collections.singletonList(Arrays.asList("1", "USER")));
         Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);
-        final List<Role> roles1 = null;
+        List<Role> roles1 = null;
         Mockito.when(roleRepository.findByUsersEmail("jean@jean.com")).thenReturn(roles1);
 
         //when
@@ -210,23 +210,6 @@ public class AuthProviderTest {
         //then
         Assert.assertNull("return null", result);
 
-    }
-
-    private String getStringFromJwtNode(String token, int indice, String nodeName) {
-        try {
-            String[] tokenTab = token.split("\\.");
-            String headerEncoded = tokenTab[indice];
-            byte[] decodeBytesHeader = Base64.getUrlDecoder().decode(headerEncoded);
-            String decodeHeader = new String(decodeBytesHeader);
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode rootNode;
-            rootNode = objectMapper.readValue(decodeHeader, JsonNode.class);
-            JsonNode node = rootNode.path(nodeName);
-            String kid = node.asText();
-            return kid;
-        } catch (Exception ex) {
-            throw new CustomJwtException("failed to get infos from the token");
-        }
     }
 
 }

@@ -108,14 +108,20 @@ public class UserWebController extends SuperController {
     @Secured({AUTHORITY_PREFIX+ADMIN})
     @RequestMapping(path = "/getRoles", method = RequestMethod.GET)
     public List<RoleDTO> getRoles() {
-        return roleService.getAdminRoleDTOSet();
+        return roleService.getAdminRoleDTOS();
     }
 
     //http://localhost:8080/api/UserWebController/putUserRoles
     @Secured({AUTHORITY_PREFIX+ADMIN})
     @RequestMapping(path = "/putUserRoles", method = RequestMethod.PUT)
     public List<UserDTO> putUserRoles(@RequestParam("email") String email, @RequestBody List<RoleDTO> roleDTOS) throws CustomConverterException {
-        return roleService.putUserRoles(email, roleDTOS);
+        List<UserDTO> userDTOS = roleService.putUserRoles(email, roleDTOS);
+        if(userDTOS.isEmpty()){
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"
+            );
+        }
+        return userDTOS;
     }
 
     //http://localhost:8080/api/UserWebController/getGenders
