@@ -34,8 +34,14 @@ public class UserWebController extends SuperController {
     //http://localhost:8080/api/UserWebController/getDataTest
     @RequestMapping(path = "/getDataTest", method = RequestMethod.GET)
     public String getDataTest(){
-        userService.getDataTest();
-        return "success";
+            if(userService.getDataTest()){
+                return "success";
+            }
+            else{
+                throw new ResponseStatusException(
+                        HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"
+                );
+            }
     }
 
     //http://localhost:8080/api/UserWebController/validateConnection
@@ -59,7 +65,12 @@ public class UserWebController extends SuperController {
     @RequestMapping(path = "/getUserDto", method = RequestMethod.GET)
     public UserDTO getUserDto(@RequestParam("email") String email) {
             validateThisUser(email);
-            UserDTO userDTO = userService.findUserDTOByEmail(email);
+            final UserDTO userDTO = userService.findUserDTOByEmail(email);
+            if(userDTO==null){
+                throw new ResponseStatusException(
+                        HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"
+                );
+            }
             userDTO.setPassword(null);
             return userDTO;
     }
@@ -67,14 +78,13 @@ public class UserWebController extends SuperController {
     //http://localhost:8080/api/UserWebController/registerUser
     @RequestMapping(value = "/registerUser", method = RequestMethod.POST)
     public Token registerUser(@RequestBody UserDTO userDTOEntry) throws CustomConverterException{
-        try {
             Token token = userService.generateUser(userDTOEntry);
-            return token;
-        } catch (ResponseStatusException ex) {
+        if(token==null){
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"
             );
         }
+        return token;
     }
 
     //http://localhost:8080/api/UserWebController/getRoleDtos?email=jean@jean.com

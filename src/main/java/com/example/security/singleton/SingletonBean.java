@@ -4,6 +4,7 @@ import com.example.security.SecurityExampleApplication;
 import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.jwk.RsaJwkGenerator;
 import org.jose4j.lang.JoseException;
+import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,7 @@ import java.util.Properties;
 public class SingletonBean {
 
     private static List<JsonWebKey> jsonWebKeys;
+    private ModelMapper modelMapper;
 
     public SingletonBean() {
         System.out.println("********SingletonBean**********");
@@ -36,9 +38,15 @@ public class SingletonBean {
                 ex.printStackTrace();
             }
         }
+
+        modelMapper = new ModelMapper();
     }
 
     public List<JsonWebKey> getJsonWebKeys(){
         return jsonWebKeys;
+    }
+
+    public ModelMapper getModelMapper() {
+        return modelMapper;
     }
 }

@@ -93,7 +93,7 @@ public class AuthProvider implements ITools {
         } catch (JoseException ex) {
             throw new CustomJoseException("Failed to generate token");
         }catch (NullPointerException ex){
-            throw new CustomTokenException("token must contain at least 1 role");
+            throw new CustomTokenException("user roles cannot be null");
         }
     }
 
