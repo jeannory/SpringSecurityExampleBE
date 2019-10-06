@@ -1,6 +1,5 @@
 package com.example.security.services.impl;
 
-import com.example.security.config.AuthProvider;
 import com.example.security.converter.SuperModelMapper;
 import com.example.security.dtos.UserDTO;
 import com.example.security.entities.Role;
@@ -8,13 +7,8 @@ import com.example.security.entities.User;
 import com.example.security.enums.Gender;
 import com.example.security.enums.Status;
 import com.example.security.exceptions.CustomConverterException;
-import com.example.security.repositories.RoleRepository;
-import com.example.security.repositories.SpaceRepository;
 import com.example.security.repositories.UserRepository;
-import com.example.security.singleton.SingletonBean;
-import com.example.security.tools.ITools;
 import com.example.security.utils.BuilderUtils;
-import org.jose4j.jws.JsonWebSignature;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,7 +21,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import java.util.*;
 
 @PrepareForTest({UserServiceImpl.class})
-public class UserServiceImplTest {
+public class UserServiceImplTest2 {
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -36,28 +30,10 @@ public class UserServiceImplTest {
     private UserRepository userRepository;
 
     @Mock
-    private RoleRepository roleRepository;
-
-    @Mock
     private RoleServiceImpl roleService;
 
     @Mock
     private SuperModelMapper superModelMapper;
-
-    @Mock
-    private SpaceRepository spaceRepository;
-
-    @Mock
-    private AuthProvider authProvider;
-
-    @Mock
-    private SingletonBean singletonBean;
-
-    @Mock
-    private JsonWebSignature jsonWebSignature;
-
-    @Mock
-    private ITools tools;
 
     @Mock
     org.springframework.security.core.userdetails.User userDetailMock;
@@ -70,20 +46,14 @@ public class UserServiceImplTest {
     @Test
     public void test_loadUserByUsername_with_all_parameters_valid_should_return_values() {
         //given
-
         Set<Role> roles1 = BuilderUtils.buildRoles(Arrays.asList(Arrays.asList("1","USER"), Arrays.asList("2","COOKER"), Arrays.asList("3","ADMIN")));
-
         List<Role> roles2 = new ArrayList<>(roles1);
-
         final User user = BuilderUtils.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE);
         user.setRoles(roles1);
         Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq("jean@jean.com"))).thenReturn(user);
-
         Mockito.when(roleService.findByUsersEmail(Mockito.eq("jean@jean.com"))).thenReturn(new ArrayList<>(roles2));
-
         final Set<GrantedAuthority> simpleGrantedAuthorities = BuilderUtils.buildAuthorities(Arrays.asList("ROLE_ADMIN", "ROLE_COOKER", "ROLE_USER"));
-
         Mockito.when(userDetailMock.getUsername()).thenReturn(user.getEmail());
         Mockito.when(userDetailMock.getPassword()).thenReturn(user.getPassword());
         Mockito.when(userDetailMock.getAuthorities()).thenReturn(simpleGrantedAuthorities);
@@ -246,35 +216,4 @@ public class UserServiceImplTest {
         Assert.assertNull("return null", result);
     }
 
-    //method and test should be upgrade because space could'nt be null
-    @Test
-    public void test_changeUserSatus_should_return_value_when_all_parameters_valid() throws CustomConverterException {
-        //given
-        final UserDTO userDTO = BuilderUtils.buildUserDTO(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
-                "9 rue du roi", "75018", "Paris", "9ème étage", null, "USER, MANAGER, ADMIN", Status.ACTIVE);
-
-        final User user = BuilderUtils.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
-                "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Arrays.asList(Arrays.asList("1","USER"), Arrays.asList("2","COOKER"), Arrays.asList("3","ADMIN")));
-        Mockito.when(userRepository.findById(Mockito.eq(userDTO.getId()))).thenReturn(Optional.of(user));
-        user.setStatus(Status.INACTIVE);
-        List<User> users = Arrays.asList(
-                user,
-                BuilderUtils.buildUser(2L, "jeanne@jeanne.com", "1234", Gender.Monsieur, "Jeanne", "Leroy", "0101010101",
-                        "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Arrays.asList(Arrays.asList("1","USER"), Arrays.asList("2","COOKER"), Arrays.asList("3","ADMIN"))));
-        Mockito.when(userRepository.findAll()).thenReturn(users);
-        userDTO.setStatus(Status.INACTIVE);
-        List<UserDTO> userDTOS = Arrays.asList(
-                userDTO,
-                BuilderUtils.buildUserDTO(2L, "jeanne@jeanne.com", "1234", Gender.Monsieur, "Jeanne", "Leroy", "0101010101",
-                        "9 rue du roi", "75018", "Paris", "9ème étage", null, "USER, MANAGER, ADMIN", Status.ACTIVE)
-        );
-        Mockito.when(superModelMapper.convertToDTOs(Mockito.eq(users))).thenReturn(userDTOS);
-
-        //when
-        List<UserDTO> result = userService.changeUserSatus(userDTO);
-
-        //then
-        Assert.assertEquals(Status.INACTIVE, result.get(0).getStatus());
-        Assert.assertEquals(Status.ACTIVE, result.get(1).getStatus());
-    }
 }

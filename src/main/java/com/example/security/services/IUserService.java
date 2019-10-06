@@ -16,7 +16,7 @@ import java.util.List;
 
 public interface IUserService {
 
-    void getDataTest();
+    boolean getDataTest();
 
     UserDTO findUserDTOByEmail(String email);
 
