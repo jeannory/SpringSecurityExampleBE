@@ -11,6 +11,7 @@ import com.example.security.enums.Gender;
 import com.example.security.enums.Status;
 import com.example.security.exceptions.CustomConverterException;
 import com.example.security.exceptions.CustomInitializationException;
+import com.example.security.exceptions.CustomTransactionalException;
 import com.example.security.models.Credential;
 import com.example.security.models.Token;
 import com.example.security.repositories.RoleRepository;
@@ -242,20 +243,31 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = CustomConverterException.class)
     public UserDTO setUser(UserDTO userDTO) {
-        User user = userRepository.findByEmail(userDTO.getEmail());
-        user.setGender(userDTO.getGender());
-        user.setFirstName(userDTO.getFirstName());
-        user.setLastName(userDTO.getLastName());
-        user.setPhoneNumber((userDTO.getPhoneNumber()));
-        user.setAdress(userDTO.getAdress());
-        user.setZip(userDTO.getZip());
-        user.setCity(userDTO.getCity());
-        user.setDeliveryInformation(userDTO.getDeliveryInformation());
-        userRepository.save(user);
+        final User user = userRepository.findByEmail(userDTO.getEmail());
+
+        if(user==null){
+            return null;
+        }
+
         try {
-            UserDTO userDTOReturn = (UserDTO) superModelMapper.convertToDTO(user).get();
+            user.setGender(userDTO.getGender());
+            user.setFirstName(userDTO.getFirstName());
+            user.setLastName(userDTO.getLastName());
+            user.setPhoneNumber((userDTO.getPhoneNumber()));
+            user.setAdress(userDTO.getAdress());
+            user.setZip(userDTO.getZip());
+            user.setCity(userDTO.getCity());
+            user.setDeliveryInformation(userDTO.getDeliveryInformation());
+            userRepository.save(user);
+        }catch(CustomTransactionalException ex){
+            ex.printStackTrace();
+            return null;
+        }
+
+        try {
+            final UserDTO userDTOReturn = (UserDTO) superModelMapper.convertToDTO(user).get();
             return userDTOReturn;
         } catch (CustomConverterException ex) {
             ex.printStackTrace();

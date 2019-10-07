@@ -100,7 +100,13 @@ public class UserWebController extends SuperController {
     @RequestMapping(path = "/setUser", method = RequestMethod.PUT)
     public UserDTO setUser(@RequestBody UserDTO userDTOEntry) {
             validateThisUser(userDTOEntry.getEmail());
-            return userService.setUser(userDTOEntry);
+        final UserDTO userDTO = userService.setUser(userDTOEntry);
+        if(userDTO==null){
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"
+            );
+        }
+        return userDTO;
     }
 
     //http://localhost:8080/api/UserWebController/getUsers
