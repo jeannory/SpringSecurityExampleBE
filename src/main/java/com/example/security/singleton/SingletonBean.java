@@ -1,6 +1,6 @@
 package com.example.security.singleton;
 
-import com.example.security.SecurityExampleApplication;
+import org.apache.log4j.Logger;
 import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.jwk.RsaJwkGenerator;
 import org.jose4j.lang.JoseException;
@@ -8,41 +8,38 @@ import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @Scope("singleton")
 public class SingletonBean {
 
+    private final static Logger logger = Logger.getLogger(SingletonBean.class);
     private static List<JsonWebKey> jsonWebKeys;
-    private ModelMapper modelMapper;
+    private static ModelMapper modelMapper;
 
     public SingletonBean() {
-        System.out.println("********SingletonBean**********");
-        jsonWebKeys = new ArrayList();
-        for (int i = 0; i < 3; i++) {
-            JsonWebKey jsonWebKey = null;
+        logger.info("**********");
+        logger.info("Constructor SingletonBean begin");
+        List<Integer> listInt = Arrays.asList(1, 2, 3);
+        jsonWebKeys = listInt.stream().map(i -> {
             try {
-                int kid = i;
-                jsonWebKey = RsaJwkGenerator.generateJwk(2048);
-                jsonWebKey.setKeyId(String.valueOf(kid));
-                jsonWebKeys.add(jsonWebKey);
-                System.out.println("JsonWebKeys number : " + i + " generate");
-            } catch (JoseException ex) {
-                ex.printStackTrace();
-            } catch (Exception ex) {
-                ex.printStackTrace();
+                JsonWebKey jsonWebKey = RsaJwkGenerator.generateJwk(2048);
+                jsonWebKey.setKeyId(String.valueOf(i));
+                logger.info("JsonWebKeys number : " + i + " generate");
+                return jsonWebKey;
+            } catch (JoseException e) {
+                e.printStackTrace();
+                return null;
             }
-        }
-
+        }).collect(Collectors.toCollection(ArrayList::new)).stream().filter(Objects::nonNull).collect(Collectors.toList());
         modelMapper = new ModelMapper();
+        logger.info("Constructor SingletonBean end");
+        logger.info("**********");
     }
 
-    public List<JsonWebKey> getJsonWebKeys(){
+    public List<JsonWebKey> getJsonWebKeys() {
         return jsonWebKeys;
     }
 

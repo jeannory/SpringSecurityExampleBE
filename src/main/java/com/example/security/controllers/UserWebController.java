@@ -9,6 +9,7 @@ import com.example.security.models.Credential;
 import com.example.security.models.Token;
 import com.example.security.services.IRoleService;
 import com.example.security.services.IUserService;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
@@ -22,12 +23,11 @@ import java.util.List;
 @RequestMapping(PRE_PATH + USER_CONTROLLER)
 public class UserWebController extends SuperController {
 
+    private final static Logger logger = Logger.getLogger(UserWebController.class);
     @Autowired
     private IUserService userService;
-
     @Autowired
     private IRoleService roleService;
-
     @Autowired
     private AuthProvider authProvider;
 
@@ -96,27 +96,36 @@ public class UserWebController extends SuperController {
     }
 
     //http://localhost:8080/api/UserWebController/setUser
-    @Secured({AUTHORITY_PREFIX+USER, AUTHORITY_PREFIX+MANAGER, AUTHORITY_PREFIX+ADMIN})
+    @Secured({AUTHORITY_PREFIX + USER, AUTHORITY_PREFIX + MANAGER, AUTHORITY_PREFIX + ADMIN})
     @RequestMapping(path = "/setUser", method = RequestMethod.PUT)
     public UserDTO setUser(@RequestBody UserDTO userDTOEntry) {
             validateThisUser(userDTOEntry.getEmail());
         final UserDTO userDTO = userService.setUser(userDTOEntry);
         if(userDTO==null){
+            logger.info("end-point setUser failed");
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"
             );
         }
+        logger.info("end-point setUser succeed");
         return userDTO;
     }
 
     //http://localhost:8080/api/UserWebController/getUsers
-    @Secured({AUTHORITY_PREFIX+ADMIN})
+    @Secured({AUTHORITY_PREFIX + ADMIN})
     @RequestMapping(path = "/getUsers", method = RequestMethod.GET)
     public List<UserDTO> getUsers() throws CustomConverterException{
         List<UserDTO> userDTOS = userService.getUsers();
+        if(userDTOS.isEmpty()||userDTOS==null){
+            logger.info("end-point getUsers failed");
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"
+            );
+        }
         userDTOS.forEach(u -> {
             u.setPassword(null);
         });
+        logger.info("end-point getUsers succeed");
         return userDTOS;
     }
 

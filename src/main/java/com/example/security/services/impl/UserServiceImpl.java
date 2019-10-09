@@ -1,6 +1,7 @@
 package com.example.security.services.impl;
 
 import com.example.security.config.AuthProvider;
+import com.example.security.config.JwtRequestFilter;
 import com.example.security.config.TokenUtilityProvider;
 import com.example.security.converter.SuperModelMapper;
 import com.example.security.dtos.UserDTO;
@@ -20,6 +21,7 @@ import com.example.security.repositories.UserRepository;
 import com.example.security.services.IRoleService;
 import com.example.security.services.IUserService;
 import com.example.security.tools.ITools;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -38,24 +40,19 @@ import static com.example.security.contants.Constants.AUTHORITY_PREFIX;
 @Service(value = "userService")
 public class UserServiceImpl implements UserDetailsService, IUserService, ITools {
 
+    private final static Logger logger = Logger.getLogger(UserServiceImpl.class);
     @Autowired
     private TokenUtilityProvider tokenUtilityProvider;
-
     @Autowired
     private AuthProvider authProvider;
-
     @Autowired
     private SuperModelMapper superModelMapper;
-
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private RoleRepository roleRepository;
-
     @Autowired
     private SpaceRepository spaceRepository;
-
     @Autowired
     private IRoleService roleService;
 
@@ -134,11 +131,11 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
 
             validateDataTest(
                     userRole, managerRole, adminRole,
-                    user1 , user2, user3, user4,
+                    user1, user2, user3, user4,
                     space1, space2, space3, space4
             );
 
-        }catch(CustomInitializationException ex){
+        } catch (CustomInitializationException ex) {
             ex.printStackTrace();
             return false;
         }
@@ -147,34 +144,38 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
 
     private void validateDataTest(
             Role userRole, Role cookerRole, Role adminRole,
-            User user1 , User user2, User user3, User user4,
+            User user1, User user2, User user3, User user4,
             Space space1, Space space2, Space space3, Space space4
-            ){
-        if(
-                userRole.getId()==null || cookerRole.getId()==null || adminRole.getId()==null ||
-                user1.getId()==null || user2.getId()==null || user3.getId()==null || user4.getId()==null ||
-                space1.getId()==null || space2.getId()==null || space3.getId()==null || space4.getId()==null
-        ){
+    ) {
+        if (
+                userRole.getId() == null || cookerRole.getId() == null || adminRole.getId() == null ||
+                        user1.getId() == null || user2.getId() == null || user3.getId() == null || user4.getId() == null ||
+                        space1.getId() == null || space2.getId() == null || space3.getId() == null || space4.getId() == null
+        ) {
             throw new CustomInitializationException("Data test failed");
         }
     }
 
-    //@Secure needs to redefine loadUserByUsername(String username)
+    /**
+     * with Spring security
+     * @Secure needs to redefine loadUserByUsername(String username)
+     * abstract method of UserDetailsService
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         try {
             final User user = manageSelectMyUserByEmailException(username);
-            Set<SimpleGrantedAuthority> simpleGrantedAuthorities = roleService.findByUsersEmail(user.getEmail()).stream().map(role-> {
+            Set<SimpleGrantedAuthority> simpleGrantedAuthorities = roleService.findByUsersEmail(user.getEmail()).stream().map(role -> {
                 return new SimpleGrantedAuthority(AUTHORITY_PREFIX + role.getName());
             }).collect(Collectors.toCollection(HashSet::new));
+            logger.info("Method loadUserByUsername succeed");
             return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), simpleGrantedAuthorities);
         } catch (UsernameNotFoundException ex) {
-            ex.printStackTrace();
+            logger.error(ex.getMessage());
             return null;
         }
     }
 
-    //only use with method loadUserByUsername
     private User manageSelectMyUserByEmailException(String username) {
         final User user = userRepository.selectMyUserByEmail(username);
         if (
@@ -193,14 +194,14 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
     public UserDTO findUserDTOByEmail(String email) {
         try {
             final User user = userRepository.findByEmail(email);
-            if(user==null){
+            if (user == null) {
                 return null;
             }
             return (UserDTO) superModelMapper.convertToDTO(user).get();
         } catch (CustomConverterException ex) {
             ex.printStackTrace();
             return null;
-        }catch(NoSuchElementException ex) {
+        } catch (NoSuchElementException ex) {
             ex.printStackTrace();
             return null;
         }
@@ -211,15 +212,15 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
     @Override
     public Token generateUser(UserDTO userDTOEntry) {
         Set<Role> roles = roleService.getUserRoleSet();
-        if(
-                userDTOEntry==null ||
-                        userDTOEntry.getEmail()==null ||
-                        userDTOEntry.getPassword()==null ||
-                        userDTOEntry.getFirstName()==null ||
-                        userDTOEntry.getLastName()==null ||
-                        roles==null ||
+        if (
+                userDTOEntry == null ||
+                        userDTOEntry.getEmail() == null ||
+                        userDTOEntry.getPassword() == null ||
+                        userDTOEntry.getFirstName() == null ||
+                        userDTOEntry.getLastName() == null ||
+                        roles == null ||
                         roles.isEmpty()
-        ){
+        ) {
             return null;
         }
         userDTOEntry.setPassword(getStringSha3(userDTOEntry.getPassword()));
@@ -232,13 +233,13 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
         space.setUser(user);
         space = spaceRepository.save(space);
         //check if @transactionnal failed
-        if(user.getId()==null||space.getId()==null){
+        if (user.getId() == null || space.getId() == null) {
             return null;
-        }else{
-        Credential credential = new Credential();
-        credential.setEmail(userDTOEntry.getEmail());
-        credential.setPassword(userDTOEntry.getPassword());
-        return authProvider.validateConnection(credential);
+        } else {
+            Credential credential = new Credential();
+            credential.setEmail(userDTOEntry.getEmail());
+            credential.setPassword(userDTOEntry.getPassword());
+            return authProvider.validateConnection(credential);
         }
     }
 
@@ -247,7 +248,7 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
     public UserDTO setUser(UserDTO userDTO) {
         final User user = userRepository.findByEmail(userDTO.getEmail());
 
-        if(user==null){
+        if (user == null) {
             return null;
         }
 
@@ -261,7 +262,7 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
             user.setCity(userDTO.getCity());
             user.setDeliveryInformation(userDTO.getDeliveryInformation());
             userRepository.save(user);
-        }catch(CustomTransactionalException ex){
+        } catch (CustomTransactionalException ex) {
             ex.printStackTrace();
             return null;
         }

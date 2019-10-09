@@ -10,6 +10,7 @@ import com.example.security.repositories.RoleRepository;
 import com.example.security.repositories.UserRepository;
 import com.example.security.singleton.SingletonBean;
 import com.example.security.tools.ITools;
+import org.apache.log4j.Logger;
 import org.jose4j.jwk.RsaJsonWebKey;
 import org.jose4j.jws.AlgorithmIdentifiers;
 import org.jose4j.jws.JsonWebSignature;
@@ -28,12 +29,11 @@ import static com.example.security.contants.Constants.DOMAIN;
 @Component
 public class AuthProvider implements ITools {
 
+    private final static Logger logger = Logger.getLogger(AuthProvider.class);
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private RoleRepository roleRepository;
-
     @Autowired
     SingletonBean singletonBean;
 
@@ -46,15 +46,15 @@ public class AuthProvider implements ITools {
         if(credentialSha3.equals(user.getPassword())) {
             try {
                 String jwt = generateJwt(credential.getEmail());
-                System.out.println("jwt : " + jwt);
                 Token token = new Token();
                 token.setToken(jwt);
+                logger.info("Method validateConnection succeed");
                 return token;
             } catch (CustomJoseException ex) {
-                ex.printStackTrace();
+                logger.error(ex.getMessage());
                 return null;
             } catch(CustomTokenException ex){
-                ex.printStackTrace();
+                logger.error(ex.getMessage());
                 return null;
             }
         }
@@ -73,14 +73,15 @@ public class AuthProvider implements ITools {
                     }).collect(Collectors.toCollection(ArrayList::new));
             int kidRandom = generateRandmoKid();
             RsaJsonWebKey rsaJsonWebKey = (RsaJsonWebKey) singletonBean.getJsonWebKeys().get(kidRandom);
-            // Create the Claims, which will be the content of the JWT
+            /**
+             * Create the Claims, which will be the content of the jwt
+             */
             JwtClaims jwtClaims = new JwtClaims();
             jwtClaims.setIssuer(DOMAIN);
             jwtClaims.setExpirationTimeMinutesInTheFuture(120);
-//            jwtClaims.setExpirationTimeMinutesInTheFuture(1);
             jwtClaims.setGeneratedJwtId();
             jwtClaims.setIssuedAtToNow();
-            jwtClaims.setNotBeforeMinutesInThePast(2);// time before which the token is not yet valid (2 minutes ago)
+            jwtClaims.setNotBeforeMinutesInThePast(2);
             jwtClaims.setSubject(email);
             jwtClaims.setStringListClaim(AUTHORITIES_KEY, rolesString);
             JsonWebSignature jsonWebSignature = new JsonWebSignature();

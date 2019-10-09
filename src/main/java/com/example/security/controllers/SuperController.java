@@ -1,5 +1,6 @@
 package com.example.security.controllers;
 
+import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -11,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 public class SuperController{
 
+    private final static Logger logger = Logger.getLogger(SuperController.class);
     private static UserDetails userDetails;
 
     private void getSecurityContextHolder() {
@@ -18,19 +20,11 @@ public class SuperController{
         userDetails = (UserDetails) authentication.getPrincipal();
     }
 
-    public String getUserEmail() {
-        getSecurityContextHolder();
-        try {
-            return userDetails.getUsername();
-        } catch (NullPointerException ex) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN, "Forbidden"
-            );
-        }
-    }
-
-    //for each @Secure ROLE_USER && ROLE_MANAGER only themself can access || all ROLE_ADMIN
-    public boolean validateThisUser(String emailEntry) {
+    /**
+     * for each @Secure ROLE_USER && ROLE_MANAGER only themself can access
+     * for all @Secure ROLE_ADMIN can access
+     */
+    public void validateThisUser(String emailEntry) {
         try {
             getSecurityContextHolder();
             boolean authorization = false;
@@ -46,7 +40,6 @@ public class SuperController{
                             HttpStatus.FORBIDDEN, "Forbidden"
                     );
                 }
-            return authorization;
         } catch (NullPointerException ex) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN, "Forbidden"

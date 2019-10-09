@@ -25,7 +25,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        //return status 403 if not allowed
+        /**
+         * return status 403 if not allowed
+         */
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().
                 authorizeRequests()
                 .antMatchers(HttpMethod.GET, "/api", "/api/*").permitAll()
@@ -38,7 +40,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .cors().and()
                 .csrf().disable();
 
-        // Add custom JWT security filter,if not allowing by @Secure return status 403
+        /**
+         * add custom JWT security filter,if not allowing by @Secure return status 403
+         */
         http.addFilterBefore(jwtRequestFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 }

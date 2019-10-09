@@ -2,9 +2,7 @@ package com.example.security.config;
 
 import com.example.security.exceptions.CustomNoHeaderException;
 import com.example.security.models.TokenUtility;
-import com.example.security.services.IUserService;
-import org.jose4j.jwt.MalformedClaimException;
-import org.jose4j.jwt.consumer.InvalidJwtException;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -27,15 +25,11 @@ import static com.example.security.contants.Constants.*;
 
 public class JwtRequestFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private IUserService userService;
-
+    private final static Logger logger = Logger.getLogger(JwtRequestFilter.class);
     @Autowired
     private UserDetailsService userDetailsService;
-
     @Autowired
     private AuthProvider authProvider;
-
     @Autowired
     private TokenUtilityProvider tokenUtilityProvider;
 
@@ -43,10 +37,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
         try {
             String token = validateTokenHeader(httpServletRequest);
-            TokenUtility tokenUtility = validateTokenUtility(token);
+            TokenUtility tokenUtility = tokenUtilityProvider.getTokenUtility(token);
             if (tokenUtility.isValidateToken()) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(tokenUtility.getEmail());
-                //see junit test
                 if(userDetails!=null){
                     List<SimpleGrantedAuthority> simpleGrantedAuthorities
                             = tokenUtility.getRoles().stream()
@@ -55,12 +48,15 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, simpleGrantedAuthorities);
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+                    logger.info("Method doFilterInternal - token is valid");
                 }
             }
         } catch (CustomNoHeaderException ex) {
-            //NPE or if token not found on header no status to return
-            //rejected if @Secure on controller
-            ex.printStackTrace();
+            /**
+             * NPE or if token not found on header no status to return
+             * rejected if @Secure on controller
+             */
+            logger.info("Method doFilterInternal : " + ex.getMessage());
         }
         filterChain.doFilter(httpServletRequest, httpServletResponse);
     }
@@ -69,7 +65,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         try {
             final String requestTokenHeader = httpServletRequest.getHeader(HEADER_STRING);
             String token = requestTokenHeader.replace(TOKEN_PREFIX, "");
-            System.out.println("token : " + token);
             if (token == null) {
                 throw new CustomNoHeaderException("token not found on header");
             }
@@ -79,7 +74,4 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }
     }
 
-    private TokenUtility validateTokenUtility(String token) throws IOException {
-        return tokenUtilityProvider.getTokenUtility(token);
-    }
 }

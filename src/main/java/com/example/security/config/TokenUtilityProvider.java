@@ -8,6 +8,7 @@ import com.example.security.singleton.SingletonBean;
 import com.example.security.tools.ITools;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.log4j.Logger;
 import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.jwk.JsonWebKeySet;
 import org.jose4j.jwt.JwtClaims;
@@ -18,7 +19,6 @@ import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Base64;
@@ -26,13 +26,12 @@ import java.util.List;
 
 import static com.example.security.contants.Constants.AUTHORITIES_KEY;
 
-//https://www.devglan.com/spring-security/jwt-role-based-authorization
 @Component
 public class TokenUtilityProvider implements ITools, Serializable {
 
+    private final static Logger logger = Logger.getLogger(TokenUtilityProvider.class);
     @Autowired
     SingletonBean singletonBean;
-
     private static TokenUtility tokenUtility;
 
     public TokenUtilityProvider() {
@@ -42,16 +41,22 @@ public class TokenUtilityProvider implements ITools, Serializable {
         try {
             tokenUtility = validateToken(token);
         } catch (CustomMalformedClaimException ex) {
-            ex.printStackTrace();
+            logger.error(ex.getMessage());
             tokenUtility.setValidateToken(false);
         } catch (CustomInvalidJwtException ex) {
-            ex.printStackTrace();
+            logger.error(ex.getMessage());
             tokenUtility.setValidateToken(false);
         } catch (CustomJwtException ex) {
-            //if exception in TokenUtility.validateToken, TokenUtilityProvider.validateJsonWebKey, TokenUtilityProvider.getStringFromJwtNode
-            ex.printStackTrace();
+            /**
+             * if exception in :
+             * -TokenUtility.validateToken
+             * -TokenUtilityProvider.validateJsonWebKey
+             * -TokenUtilityProvider.getStringFromJwtNode
+             */
+            logger.error(ex.getMessage());
             tokenUtility.setValidateToken(false);
         }
+        logger.info("Method getTokenUtility succeed");
         return tokenUtility;
     }
 
@@ -60,7 +65,9 @@ public class TokenUtilityProvider implements ITools, Serializable {
         try {
             String kid = getStringFromJwtNode(token, 0, "kid");
             String issuer = getStringFromJwtNode(token, 1, "iss");
-            //not using
+            /**
+             * not in use
+             */
             String exp = getStringFromJwtNode(token, 1, "exp");
             JsonWebKey jsonWebKey = validateJsonWebKey(kid);
             tokenUtility.setKid(Integer.valueOf(kid));
@@ -79,8 +86,10 @@ public class TokenUtilityProvider implements ITools, Serializable {
                 tokenUtility.setEmail(jwtClaims.getSubject());
                 List<String> roleStrings = jwtClaims.getStringListClaimValue(AUTHORITIES_KEY);
                 tokenUtility.setRoles(roleStrings);
-                //JWT validation succeeded
-                tokenUtility.setValidateToken(true);//verified
+                /**
+                 * jwt validation succeeded
+                 */
+                tokenUtility.setValidateToken(true);
                 return tokenUtility;
             }
         } catch (MalformedClaimException ex) {
@@ -92,7 +101,9 @@ public class TokenUtilityProvider implements ITools, Serializable {
         }
     }
 
-    //not using
+    /**
+     * to calculate expiration of jwt
+     */
     private Long millisecondsLeft(String exp) {
         NumericDate jwtNumericDate = NumericDate.fromSeconds(Long.valueOf(exp));
         NumericDate numericDateNow = NumericDate.now();
@@ -116,19 +127,18 @@ public class TokenUtilityProvider implements ITools, Serializable {
             throw new CustomJwtException("failed to get infos from the token");
         } catch (NullPointerException ex) {
             throw new CustomJwtException("failed to get infos from the token");
-        }catch(Exception ex){
-            throw new CustomJwtException("failed to get infos from the token");
         }
     }
 
     private JsonWebKey validateJsonWebKey(String kid) {
         try {
-            //Get jsonWebKey by kid
+            /**
+             * get jsonWebKey by kid
+             */
             JsonWebKeySet jsonWebKeySet = new JsonWebKeySet(singletonBean.getJsonWebKeys());
             JsonWebKey jsonWebKey = jsonWebKeySet.findJsonWebKey(kid, null, null, null);
             return jsonWebKey;
         } catch (NullPointerException ex) {
-            ex.printStackTrace();
             throw new CustomJwtException("failed to created JsonWebKeySet");
         }
     }
