@@ -5,7 +5,7 @@ import java.util.List;
 public class TokenUtility {
 
     private int kid;
-    private static String email;
+    private String email;
     private boolean validateToken;
     private List<String> roles;
 
@@ -20,12 +20,12 @@ public class TokenUtility {
         this.kid = kid;
     }
 
-    public static String getEmail() {
+    public String getEmail() {
         return email;
     }
 
-    public static void setEmail(String email) {
-        TokenUtility.email = email;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public boolean isValidateToken() {
