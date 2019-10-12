@@ -1,12 +1,18 @@
 package com.example.security.config;
 
 import com.example.security.entities.Role;
+import com.example.security.entities.User;
+import com.example.security.enums.Gender;
+import com.example.security.enums.Status;
 import com.example.security.exceptions.CustomJoseException;
 import com.example.security.exceptions.CustomTokenException;
+import com.example.security.models.Credential;
 import com.example.security.models.Token;
 import com.example.security.models.TokenUtility;
 import com.example.security.repositories.RoleRepository;
+import com.example.security.repositories.UserRepository;
 import com.example.security.singleton.SingletonBean;
+import com.example.security.tools.ITools;
 import com.example.security.utils.BuilderUtils;
 import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.jwt.NumericDate;
@@ -21,31 +27,34 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class AuthProviderTest2 {
+public class AuthProviderTest2 implements ITools {
 
     private AuthProvider authProvider;
-    private TokenUtilityProvider tokenUtilityProvider;
+    private UserRepository userRepository;
     private RoleRepository roleRepository;
     private SingletonBean singletonBean;
 
     @Before
-    public void setUp() throws Exception{
+    public void setUp() throws Exception {
         this.authProvider = new AuthProvider();
-        tokenUtilityProvider = Mockito.mock(TokenUtilityProvider.class);
+        userRepository = Mockito.mock(UserRepository.class);
         roleRepository = Mockito.mock(RoleRepository.class);
         singletonBean = Mockito.mock(SingletonBean.class);
-        Whitebox.setInternalState(authProvider,"tokenUtilityProvider", tokenUtilityProvider);
+        Whitebox.setInternalState(authProvider, "userRepository", userRepository);
         Whitebox.setInternalState(authProvider, "roleRepository", roleRepository);
         Whitebox.setInternalState(authProvider, "singletonBean", singletonBean);
     }
 
     @Test
-    public void test_validateRefreshToken_when_all_parameters_valid() throws JoseException {
+    public void test_validateConnection_when_all_parameters_valid() throws JoseException {
         //given
-        final TokenUtility tokenUtility = Mockito.spy(new TokenUtility());
-        Mockito.when(tokenUtility.getEmail()).thenReturn("email");
-        Mockito.when(tokenUtility.isValidateToken()).thenReturn(true);
-        Mockito.when(tokenUtilityProvider.getTokenUtility(Mockito.anyString())).thenReturn(tokenUtility);
+        final Credential credential = Mockito.spy(new Credential());
+        credential.setEmail("jean@jean.com");
+        credential.setPassword("1234");
+        final String hashPassword = getStringSha3(credential.getPassword());
+        final User user = BuilderUtils.buildUser(1L, "jean@jean.com", hashPassword, Gender.Monsieur, "Jean", "Leroy", "0101010101",
+                "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Collections.singletonList(Arrays.asList("1", "USER")));
+        Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);
         List<Role> roles = Arrays.asList(
                 BuilderUtils.buildRole(Arrays.asList("1", "USER")),
                 BuilderUtils.buildRole(Arrays.asList("2", "MANAGER")),
@@ -57,20 +66,14 @@ public class AuthProviderTest2 {
                 BuilderUtils.buildJsonWebKey(2)
         );
         Mockito.when(singletonBean.getJsonWebKeys()).thenReturn(jsonWebKeys);
-        final Token token = Mockito.mock(Token.class);
-        Mockito.when(token.getToken()).thenReturn("token old");
 
         //when
-        final Token result = authProvider.validateRefreshToken(token);
+        final Token result = authProvider.validateConnection(credential);
 
         //then
         Assert.assertNotNull("return not null", result.getToken());
         /**
-         * the refresh token is always different than the old one
-         */
-        Assert.assertNotEquals(token.getToken(), result.getToken());
-        /**
-         * the refresh token has a new expiration which is always after now
+         * the token has a new expiration which is always after now
          */
         final String expiration = BuilderUtils.getStringFromJwtNode(result.getToken(), 1, "exp");
         final NumericDate jwtNumericDate = NumericDate.fromSeconds(Long.valueOf(expiration));
@@ -79,12 +82,15 @@ public class AuthProviderTest2 {
     }
 
     @Test
-    public void test_validateRefreshToken_when_token_is_null() throws JoseException {
+    public void test_validateConnection_when_throws_CustomJoseException_should_return_null() throws JoseException {
         //given
-        final TokenUtility tokenUtility = Mockito.spy(new TokenUtility());
-        Mockito.when(tokenUtility.getEmail()).thenReturn("email");
-        Mockito.when(tokenUtility.isValidateToken()).thenReturn(true);
-        Mockito.when(tokenUtilityProvider.getTokenUtility(Mockito.anyString())).thenReturn(tokenUtility);
+        final Credential credential = Mockito.spy(new Credential());
+        credential.setEmail("jean@jean.com");
+        credential.setPassword("1234");
+        final String hashPassword = getStringSha3(credential.getPassword());
+        final User user = BuilderUtils.buildUser(1L, "jean@jean.com", hashPassword, Gender.Monsieur, "Jean", "Leroy", "0101010101",
+                "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Collections.singletonList(Arrays.asList("1", "USER")));
+        Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);
         List<Role> roles = Arrays.asList(
                 BuilderUtils.buildRole(Arrays.asList("1", "USER")),
                 BuilderUtils.buildRole(Arrays.asList("2", "MANAGER")),
@@ -96,65 +102,21 @@ public class AuthProviderTest2 {
                 BuilderUtils.buildJsonWebKey(2)
         );
         Mockito.when(singletonBean.getJsonWebKeys()).thenReturn(jsonWebKeys);
-        final Token token = Mockito.mock(Token.class);
-        Mockito.when(token.getToken()).thenReturn("token old");
-
-        //when
-        final Token result = authProvider.validateRefreshToken(null);
-
-        //then
-        Assert.assertNull("return null", result);
-    }
-
-    @Test
-    public void test_validateRefreshToken_when_isValidateToken_is_false() throws JoseException {
-        //given
-        final TokenUtility tokenUtility = Mockito.spy(new TokenUtility());
-        Mockito.when(tokenUtility.getEmail()).thenReturn("email");
-        Mockito.when(tokenUtility.isValidateToken()).thenReturn(false);
-        Mockito.when(tokenUtilityProvider.getTokenUtility(Mockito.anyString())).thenReturn(tokenUtility);
-        final Token token = Mockito.mock(Token.class);
-        Mockito.when(token.getToken()).thenReturn("token old");
-
-        //when
-        final Token result = authProvider.validateRefreshToken(token);
-
-        //then
-        Assert.assertNull("return null", result);
-    }
-
-    @Test
-    public void test_validateRefreshToken_when_throws_CustomJoseException() throws JoseException {
-        //given
-        final TokenUtility tokenUtility = Mockito.spy(new TokenUtility());
-        Mockito.when(tokenUtility.getEmail()).thenReturn("email");
-        Mockito.when(tokenUtility.isValidateToken()).thenReturn(true);
-        Mockito.when(tokenUtilityProvider.getTokenUtility(Mockito.anyString())).thenReturn(tokenUtility);
-        List<Role> roles = Arrays.asList(
-                BuilderUtils.buildRole(Arrays.asList("1", "USER")),
-                BuilderUtils.buildRole(Arrays.asList("2", "MANAGER")),
-                BuilderUtils.buildRole(Arrays.asList("3", "ADMIN")));
-        Mockito.when(roleRepository.findByUsersEmail(Mockito.anyString())).thenReturn(roles);
-        List<JsonWebKey> jsonWebKeys = Arrays.asList(
-                BuilderUtils.buildJsonWebKey(0),
-                BuilderUtils.buildJsonWebKey(1),
-                BuilderUtils.buildJsonWebKey(2)
-        );
-        Mockito.when(singletonBean.getJsonWebKeys()).thenReturn(jsonWebKeys);
-        final Token token = Mockito.mock(Token.class);
-        Mockito.when(token.getToken()).thenReturn("token old");
 
         //when && then
-        Mockito.when(authProvider.validateRefreshToken(token)).thenThrow(new CustomJoseException("Failed to generate token")).thenReturn(null);
+        Mockito.when(authProvider.validateConnection(credential)).thenThrow(new CustomJoseException("Failed to generate token")).thenReturn(null);
     }
 
     @Test
     public void test_validateRefreshToken_when_throws_CustomTokenException() throws JoseException {
         //given
-        final TokenUtility tokenUtility = Mockito.spy(new TokenUtility());
-        Mockito.when(tokenUtility.getEmail()).thenReturn("email");
-        Mockito.when(tokenUtility.isValidateToken()).thenReturn(true);
-        Mockito.when(tokenUtilityProvider.getTokenUtility(Mockito.anyString())).thenReturn(tokenUtility);
+        final Credential credential = Mockito.spy(new Credential());
+        credential.setEmail("jean@jean.com");
+        credential.setPassword("1234");
+        final String hashPassword = getStringSha3(credential.getPassword());
+        final User user = BuilderUtils.buildUser(1L, "jean@jean.com", hashPassword, Gender.Monsieur, "Jean", "Leroy", "0101010101",
+                "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Collections.singletonList(Arrays.asList("1", "USER")));
+        Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);
         List<Role> roles = Arrays.asList(
                 BuilderUtils.buildRole(Arrays.asList("1", "USER")),
                 BuilderUtils.buildRole(Arrays.asList("2", "MANAGER")),
@@ -166,28 +128,100 @@ public class AuthProviderTest2 {
                 BuilderUtils.buildJsonWebKey(2)
         );
         Mockito.when(singletonBean.getJsonWebKeys()).thenReturn(jsonWebKeys);
-        final Token token = Mockito.mock(Token.class);
-        Mockito.when(token.getToken()).thenReturn("token old");
 
         //when && then
-        Mockito.when(authProvider.validateRefreshToken(token)).thenThrow(new CustomTokenException("all objects must be initialized to build jsonWebSignature")).thenReturn(null);
+        Mockito.when(authProvider.validateConnection(credential)).thenThrow(new CustomTokenException("all objects must be initialized to build jsonWebSignature")).thenReturn(null);
     }
 
     @Test
     public void test_validateRefreshToken_when_role_is_empty_then_throw_CustomTokenException() throws JoseException {
         //given
-        final TokenUtility tokenUtility = Mockito.spy(new TokenUtility());
-        Mockito.when(tokenUtility.getEmail()).thenReturn("email");
-        Mockito.when(tokenUtility.isValidateToken()).thenReturn(true);
-        Mockito.when(tokenUtilityProvider.getTokenUtility(Mockito.anyString())).thenReturn(tokenUtility);
+        final Credential credential = Mockito.spy(new Credential());
+        credential.setEmail("jean@jean.com");
+        credential.setPassword("1234");
+        final String hashPassword = getStringSha3(credential.getPassword());
+        final User user = BuilderUtils.buildUser(1L, "jean@jean.com", hashPassword, Gender.Monsieur, "Jean", "Leroy", "0101010101",
+                "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Collections.singletonList(Arrays.asList("1", "USER")));
+        Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);
         Mockito.when(roleRepository.findByUsersEmail(Mockito.anyString())).thenReturn(Collections.emptyList());
-        final Token token = Mockito.mock(Token.class);
-        Mockito.when(token.getToken()).thenReturn("token old");
 
         //when
-        final Token result = authProvider.validateRefreshToken(token);
+        final Token result = authProvider.validateConnection(credential);
 
         //then
         Assert.assertNull("return null", result);
+    }
+
+    @Test
+    public void test_getRefreshToken_when_all_parameters_valid() throws JoseException{
+        //given
+        List<Role> roles = Arrays.asList(
+                BuilderUtils.buildRole(Arrays.asList("1", "USER")),
+                BuilderUtils.buildRole(Arrays.asList("2", "MANAGER")),
+                BuilderUtils.buildRole(Arrays.asList("3", "ADMIN")));
+        Mockito.when(roleRepository.findByUsersEmail(Mockito.anyString())).thenReturn(roles);
+        List<JsonWebKey> jsonWebKeys = Arrays.asList(
+                BuilderUtils.buildJsonWebKey(0),
+                BuilderUtils.buildJsonWebKey(1),
+                BuilderUtils.buildJsonWebKey(2)
+        );
+        Mockito.when(singletonBean.getJsonWebKeys()).thenReturn(jsonWebKeys);
+
+        //when
+        Token result = authProvider.getRefreshToken(Mockito.anyString());
+
+        //then
+        Assert.assertNotNull("return not null", result.getToken());
+        /**
+         * the token has a new expiration which is always after now
+         */
+        final String expiration = BuilderUtils.getStringFromJwtNode(result.getToken(), 1, "exp");
+        final NumericDate jwtNumericDate = NumericDate.fromSeconds(Long.valueOf(expiration));
+        final NumericDate numericDateNow = NumericDate.now();
+        Assert.assertTrue(jwtNumericDate.isOnOrAfter(numericDateNow));
+    }
+
+    @Test
+    public void test_getRefreshToken_when_email_is_null_then_throws_CustomTokenException() throws JoseException{
+        //given && when
+        Token result = authProvider.getRefreshToken(null);
+
+        //then
+        Assert.assertNull("return null", result);
+    }
+
+    @Test
+    public void test_getRefreshToken_when_roles_is_empty_then_throws_CustomTokenException() throws JoseException{
+        //given
+        List<Role> roles = Arrays.asList(
+                BuilderUtils.buildRole(Arrays.asList("1", "USER")),
+                BuilderUtils.buildRole(Arrays.asList("2", "MANAGER")),
+                BuilderUtils.buildRole(Arrays.asList("3", "ADMIN")));
+        Mockito.when(roleRepository.findByUsersEmail(Mockito.anyString())).thenReturn(Collections.emptyList());
+
+        //when
+        Token result = authProvider.getRefreshToken(null);
+
+        //then
+        Assert.assertNull("return null", result);
+    }
+
+    @Test
+    public void test_getRefreshToken_when_throws_CustomJoseException_should_return_null() throws JoseException{
+        //given
+        List<Role> roles = Arrays.asList(
+                BuilderUtils.buildRole(Arrays.asList("1", "USER")),
+                BuilderUtils.buildRole(Arrays.asList("2", "MANAGER")),
+                BuilderUtils.buildRole(Arrays.asList("3", "ADMIN")));
+        Mockito.when(roleRepository.findByUsersEmail(Mockito.anyString())).thenReturn(roles);
+        List<JsonWebKey> jsonWebKeys = Arrays.asList(
+                BuilderUtils.buildJsonWebKey(0),
+                BuilderUtils.buildJsonWebKey(1),
+                BuilderUtils.buildJsonWebKey(2)
+        );
+        Mockito.when(singletonBean.getJsonWebKeys()).thenReturn(jsonWebKeys);
+
+        //when && then
+        Mockito.when(authProvider.getRefreshToken(Mockito.anyString())).thenThrow(new CustomJoseException("Failed to generate token")).thenReturn(null);;
     }
 }

@@ -9,15 +9,17 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.server.ResponseStatusException;
 
-
 public class SuperController{
 
     private final static Logger logger = Logger.getLogger(SuperController.class);
-    private static UserDetails userDetails;
 
-    private void getSecurityContextHolder() {
-        UsernamePasswordAuthenticationToken authentication = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        userDetails = (UserDetails) authentication.getPrincipal();
+    private UserDetails getSecurityContextHolder() {
+        final UsernamePasswordAuthenticationToken authentication = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        return (UserDetails) authentication.getPrincipal();
+    }
+
+    public String getEmailUser(){
+        return getSecurityContextHolder().getUsername();
     }
 
     /**
@@ -26,7 +28,7 @@ public class SuperController{
      */
     public void validateThisUser(String emailEntry) {
         try {
-            getSecurityContextHolder();
+            final UserDetails userDetails = getSecurityContextHolder();
             boolean authorization = false;
             if(userDetails.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))){
                 authorization = true;
