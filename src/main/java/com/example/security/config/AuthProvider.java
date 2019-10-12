@@ -6,7 +6,6 @@ import com.example.security.exceptions.CustomJoseException;
 import com.example.security.exceptions.CustomTokenException;
 import com.example.security.models.Credential;
 import com.example.security.models.Token;
-import com.example.security.models.TokenUtility;
 import com.example.security.repositories.RoleRepository;
 import com.example.security.repositories.UserRepository;
 import com.example.security.singleton.SingletonBean;
@@ -37,8 +36,6 @@ public class AuthProvider implements ITools {
     private RoleRepository roleRepository;
     @Autowired
     SingletonBean singletonBean;
-    @Autowired
-    private TokenUtilityProvider tokenUtilityProvider;
 
     public Token validateConnection(Credential credential) {
         String credentialSha3 = getStringSha3(credential.getPassword());
@@ -63,18 +60,12 @@ public class AuthProvider implements ITools {
         return null;
     }
 
-    public Token validateRefreshToken(Token token) {
-        if(token==null){
-            return null;
-        }
-        final TokenUtility tokenUtility = tokenUtilityProvider.getTokenUtility(token.getToken());
-        if (tokenUtility.isValidateToken()) {
+    public Token getRefreshToken(String email){
             try {
-                final Token token1 = new Token();
-                logger.info("refreshToken old : " + token.getToken());
-                token1.setToken(generateJwt(tokenUtility.getEmail()));
-                logger.info("refreshToken new : " + token1.getToken());
-                return token1;
+                final Token token = new Token();
+                token.setToken(generateJwt(email));
+                logger.info("refreshToken new : " + token.getToken());
+                return token;
             } catch (CustomJoseException ex) {
                 logger.error(ex.getMessage());
                 return null;
@@ -82,15 +73,13 @@ public class AuthProvider implements ITools {
                 logger.error(ex.getMessage());
                 return null;
             }
-        }
-        return null;
     }
 
     private String generateJwt(String email) {
         try {
             List<Role> roles = roleRepository.findByUsersEmail(email);
             if (roles.isEmpty() || roles == null) {
-                throw new CustomTokenException("token must contain at least 1 role");
+                throw new CustomTokenException("email cannot be empty && token must contain at least 1 role");
             }
             List<String> rolesString = roles.stream().map(
                     role -> {

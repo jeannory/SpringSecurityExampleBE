@@ -163,9 +163,9 @@ public class UserWebController extends SuperController {
     }
 
     //http://localhost:8080/api/UserWebController/refreshToken
-    @RequestMapping(path = "/refreshToken", method = RequestMethod.POST)
-    public Token refreshToken(@RequestBody Token token)  {
-        token = authProvider.validateRefreshToken(token);
+    @RequestMapping(path = "/refreshToken", method = RequestMethod.GET)
+    public Token refreshToken()  {
+        Token token = authProvider.getRefreshToken(getEmailUser());
         if(token == null){
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"
