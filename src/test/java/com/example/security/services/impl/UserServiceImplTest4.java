@@ -102,7 +102,6 @@ public class UserServiceImplTest4 {
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Arrays.asList(Arrays.asList("1","User"), Arrays.asList("2","MANAGER"), Arrays.asList("3","ADMIN"))));
 
         Mockito.when(userRepository.findByEmail(Mockito.anyString())).thenReturn(user);
-
         user.setGender(userDTO.getGender());
         user.setFirstName(userDTO.getFirstName());
         user.setLastName(userDTO.getLastName());
@@ -111,11 +110,10 @@ public class UserServiceImplTest4 {
         user.setZip(userDTO.getZip());
         user.setCity(userDTO.getCity());
         user.setDeliveryInformation(userDTO.getDeliveryInformation());
-
         Mockito.when(userRepository.save(Mockito.any(User.class))).thenThrow(new CustomTransactionalException());
 
         //when
-        UserDTO result = userService.setUser(userDTO);
+        final UserDTO result = userService.setUser(userDTO);
 
         //then
         Assert.assertNull("return null", result);
@@ -146,7 +144,7 @@ public class UserServiceImplTest4 {
         Mockito.when(superModelMapper.convertToDTO(Mockito.any(User.class))).thenThrow(new CustomConverterException());
 
         //when
-        UserDTO result = userService.setUser(userDTO);
+        final UserDTO result = userService.setUser(userDTO);
 
         //then
         Assert.assertNull("return null", result);

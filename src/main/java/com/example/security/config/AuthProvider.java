@@ -38,14 +38,15 @@ public class AuthProvider implements ITools {
     SingletonBean singletonBean;
 
     public Token validateConnection(Credential credential) {
-        String credentialSha3 = getStringSha3(credential.getPassword());
-        User user = userRepository.selectMyUserByEmail(credential.getEmail());
+        logger.info("Method validateConnection");
+        final String credentialSha3 = getStringSha3(credential.getPassword());
+        final User user = userRepository.selectMyUserByEmail(credential.getEmail());
         if (user == null) {
             return null;
         } else if (credentialSha3.equals(user.getPassword())) {
             try {
-                String jwt = generateJwt(credential.getEmail());
-                Token token = new Token();
+                final String jwt = generateJwt(credential.getEmail());
+                final Token token = new Token();
                 token.setToken(jwt);
                 logger.info("Method validateConnection succeed");
                 return token;
@@ -61,6 +62,7 @@ public class AuthProvider implements ITools {
     }
 
     public Token getRefreshToken(String email){
+        logger.info("Method getRefreshToken");
             try {
                 final Token token = new Token();
                 token.setToken(generateJwt(email));
@@ -76,6 +78,7 @@ public class AuthProvider implements ITools {
     }
 
     private String generateJwt(String email) {
+        logger.info("Method generateJwt");
         try {
             List<Role> roles = roleRepository.findByUsersEmail(email);
             if (roles.isEmpty() || roles == null) {
@@ -85,12 +88,12 @@ public class AuthProvider implements ITools {
                     role -> {
                         return role.getName();
                     }).collect(Collectors.toCollection(ArrayList::new));
-            Integer kidRandom = generateRandmoKid();
-            RsaJsonWebKey rsaJsonWebKey = (RsaJsonWebKey) singletonBean.getJsonWebKeys().get(kidRandom);
+            final int kidRandom = generateRandmoKid();
+            final RsaJsonWebKey rsaJsonWebKey = (RsaJsonWebKey) singletonBean.getJsonWebKeys().get(kidRandom);
             /**
              * Create the Claims, which will be the content of the jwt
              */
-            JwtClaims jwtClaims = new JwtClaims();
+            final JwtClaims jwtClaims = new JwtClaims();
             jwtClaims.setIssuer(DOMAIN);
             /**
             *UI request for refresh token 30 min before its expiration
@@ -104,7 +107,7 @@ public class AuthProvider implements ITools {
             jwtClaims.setNotBeforeMinutesInThePast(2);
             jwtClaims.setSubject(email);
             jwtClaims.setStringListClaim(AUTHORITIES_KEY, rolesString);
-            JsonWebSignature jsonWebSignature = new JsonWebSignature();
+            final JsonWebSignature jsonWebSignature = new JsonWebSignature();
             jsonWebSignature.setPayload(jwtClaims.toJson());
             jsonWebSignature.setKeyIdHeaderValue(rsaJsonWebKey.getKeyId());
             jsonWebSignature.setKey(rsaJsonWebKey.getPrivateKey());

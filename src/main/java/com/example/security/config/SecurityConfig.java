@@ -1,5 +1,6 @@
 package com.example.security.config;
 
+import org.apache.log4j.Logger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -18,6 +19,7 @@ import static com.example.security.contants.Constants.ADMIN;
 @EnableGlobalMethodSecurity(securedEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+    private final static Logger logger = Logger.getLogger(SecurityConfig.class);
     @Bean
     public JwtRequestFilter jwtRequestFilter() {
         return new JwtRequestFilter();
@@ -25,6 +27,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        logger.info("Method configure");
         /**
          * return status 403 if not allowed
          */

@@ -56,26 +56,27 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
     @Autowired
     private IRoleService roleService;
 
-    @Transactional
+    @Transactional(rollbackFor = CustomTransactionalException.class)
     @Override
     public boolean getDataTest() {
+        logger.info("Method getDataTest");
         try {
-            Role userRole = new Role();
+            final Role userRole = new Role();
             userRole.setName(USER);
-            Role managerRole = new Role();
+            final Role managerRole = new Role();
             managerRole.setName(MANAGER);
-            Role adminRole = new Role();
+            final Role adminRole = new Role();
             adminRole.setName(ADMIN);
 
-            userRole = roleRepository.save(userRole);
-            managerRole = roleRepository.save(managerRole);
-            adminRole = roleRepository.save(adminRole);
+            roleRepository.save(userRole);
+            roleRepository.save(managerRole);
+            roleRepository.save(adminRole);
 
             Set<Role> userRoles = roleService.getUserRoleSet();
             Set<Role> managerRoles = roleService.getManagerRoleSet();
             Set<Role> adminRoles = roleService.getAdminRoleSet();
 
-            User user1 = new User();
+            final User user1 = new User();
             user1.setEmail("jean@jean.com");
             user1.setGender(Gender.Monsieur);
             user1.setFirstName("Jean");
@@ -87,15 +88,15 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
             user1.setZip("95000");
             user1.setCity("Cergy");
             user1.setDeliveryInformation("2ème étage");
-            User user2 = new User();
+            final User user2 = new User();
             user2.setEmail("jeanne@jeanne.com");
             user2.setPassword(getStringSha3("0000"));
             user2.setRoles(managerRoles);
-            User user3 = new User();
+            final User user3 = new User();
             user3.setEmail("john@john.com");
             user3.setPassword(getStringSha3("0000"));
             user3.setRoles(userRoles);
-            User user4 = new User();
+            final User user4 = new User();
             user4.setEmail("johny@johny.com");
             user4.setPassword(getStringSha3("0000"));
             user4.setRoles(userRoles);
@@ -104,56 +105,36 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
             user3.setStatus(Status.ACTIVE);
             user4.setStatus(Status.INACTIVE);
 
-            user1 = userRepository.save(user1);
-            user2 = userRepository.save(user2);
-            user3 = userRepository.save(user3);
-            user4 = userRepository.save(user4);
+            userRepository.save(user1);
+            userRepository.save(user2);
+            userRepository.save(user3);
+            userRepository.save(user4);
 
-            Space space1 = new Space();
+            final Space space1 = new Space();
             space1.setName("Jean@jean.com space");
             space1.setUser(user1);
-            space1 = spaceRepository.save(space1);
+            spaceRepository.save(space1);
 
-            Space space2 = new Space();
+            final Space space2 = new Space();
             space2.setName("jeanne@jeanne.com space");
             space2.setUser(user2);
-            space2 = spaceRepository.save(space2);
+            spaceRepository.save(space2);
 
-            Space space3 = new Space();
+            final Space space3 = new Space();
             space3.setName("john@john.com space");
             space3.setUser(user3);
-            space3 = spaceRepository.save(space3);
+            spaceRepository.save(space3);
 
-            Space space4 = new Space();
+            final Space space4 = new Space();
             space4.setName("johny@johny.com space");
             space4.setUser(user4);
-            space4 = spaceRepository.save(space4);
+            spaceRepository.save(space4);
 
-            validateDataTest(
-                    userRole, managerRole, adminRole,
-                    user1, user2, user3, user4,
-                    space1, space2, space3, space4
-            );
-
-        } catch (CustomInitializationException ex) {
-            ex.printStackTrace();
+        } catch (CustomTransactionalException ex) {
+            logger.error(ex.getMessage());
             return false;
         }
         return true;
-    }
-
-    private void validateDataTest(
-            Role userRole, Role cookerRole, Role adminRole,
-            User user1, User user2, User user3, User user4,
-            Space space1, Space space2, Space space3, Space space4
-    ) {
-        if (
-                userRole.getId() == null || cookerRole.getId() == null || adminRole.getId() == null ||
-                        user1.getId() == null || user2.getId() == null || user3.getId() == null || user4.getId() == null ||
-                        space1.getId() == null || space2.getId() == null || space3.getId() == null || space4.getId() == null
-        ) {
-            throw new CustomInitializationException("Data test failed");
-        }
     }
 
     /**
@@ -163,6 +144,7 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        logger.info("Method loadUserByUsername");
         try {
             final User user = manageSelectMyUserByEmailException(username);
             Set<SimpleGrantedAuthority> simpleGrantedAuthorities = roleService.findByUsersEmail(user.getEmail()).stream().map(role -> {
@@ -177,13 +159,16 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
     }
 
     private User manageSelectMyUserByEmailException(String username) {
+        logger.info("Method manageSelectMyUserByEmailException");
         final User user = userRepository.selectMyUserByEmail(username);
         if (
                 user == null ||
                         user.getId() == null ||
                         user.getEmail() == null ||
-                        user.getPassword() == null ||
-                        user.getRoles() == null
+                        user.getPassword() == null
+                        //toDo to handle
+                        //Unable to evaluate the expression Method threw 'org.hibernate.LazyInitializationException' exception.
+                        //user.getRoles() == null
         ) {
             throw new UsernameNotFoundException("Invalid user");
         }
@@ -192,6 +177,7 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
 
     @Override
     public UserDTO findUserDTOByEmail(String email) {
+        logger.info("Method findUserDTOByEmail");
         try {
             final User user = userRepository.findByEmail(email);
             if (user == null) {
@@ -199,18 +185,19 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
             }
             return (UserDTO) superModelMapper.convertToDTO(user).get();
         } catch (CustomConverterException ex) {
-            ex.printStackTrace();
+            logger.error(ex.getMessage());
             return null;
         } catch (NoSuchElementException ex) {
-            ex.printStackTrace();
+            logger.error(ex.getMessage());
             return null;
         }
     }
 
 
-    @Transactional
+    @Transactional(rollbackFor = CustomTransactionalException.class)
     @Override
     public Token generateUser(UserDTO userDTOEntry) {
+        logger.info("Method generateUser");
         Set<Role> roles = roleService.getUserRoleSet();
         if (
                 userDTOEntry == null ||
@@ -223,35 +210,37 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
         ) {
             return null;
         }
-        userDTOEntry.setPassword(getStringSha3(userDTOEntry.getPassword()));
-        User user = (User) (superModelMapper.convertToEntity(userDTOEntry)).get();
-        user.setRoles(roles);
-        user.setStatus(Status.ACTIVE);
-        user = userRepository.save(user);
-        Space space = new Space();
-        space.setName("Espace de " + user.getEmail());
-        space.setUser(user);
-        space = spaceRepository.save(space);
-        //check if @transactionnal failed
-        if (user.getId() == null || space.getId() == null) {
-            return null;
-        } else {
-            Credential credential = new Credential();
+
+        try {
+            userDTOEntry.setPassword(getStringSha3(userDTOEntry.getPassword()));
+            final User user = (User) (superModelMapper.convertToEntity(userDTOEntry)).get();
+            user.setRoles(roles);
+            user.setStatus(Status.ACTIVE);
+            userRepository.save(user);
+            final Space space = new Space();
+            space.setName("Espace de " + user.getEmail());
+            space.setUser(user);
+            spaceRepository.save(space);
+            final Credential credential = new Credential();
             credential.setEmail(userDTOEntry.getEmail());
             credential.setPassword(userDTOEntry.getPassword());
             return authProvider.validateConnection(credential);
-        }
-    }
 
-    @Override
-    @Transactional(rollbackFor = CustomConverterException.class)
-    public UserDTO setUser(UserDTO userDTO) {
-        final User user = userRepository.findByEmail(userDTO.getEmail());
-
-        if (user == null) {
+        } catch (CustomTransactionalException ex) {
+            logger.error(ex.getMessage());
             return null;
         }
 
+    }
+
+    @Override
+    @Transactional(rollbackFor = CustomTransactionalException.class)
+    public UserDTO setUser(UserDTO userDTO) {
+        logger.info("Method setUser");
+        final User user = userRepository.findByEmail(userDTO.getEmail());
+        if (user == null) {
+            return null;
+        }
         try {
             user.setGender(userDTO.getGender());
             user.setFirstName(userDTO.getFirstName());
@@ -263,21 +252,21 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
             user.setDeliveryInformation(userDTO.getDeliveryInformation());
             userRepository.save(user);
         } catch (CustomTransactionalException ex) {
-            ex.printStackTrace();
+            logger.error(ex.getMessage());
             return null;
         }
-
         try {
             final UserDTO userDTOReturn = (UserDTO) superModelMapper.convertToDTO(user).get();
             return userDTOReturn;
         } catch (CustomConverterException ex) {
-            ex.printStackTrace();
+            logger.error(ex.getMessage());
             return null;
         }
     }
 
     @Override
     public List<UserDTO> getUsers() {
+        logger.info("Method getUsers");
         List<UserDTO> userDTOS = (List<UserDTO>) superModelMapper.convertToDTOs(userRepository.findAll());
         userDTOS.forEach(u -> {
             u.setFlattenRoles(buildFlattenRoles(roleRepository.findByUsersEmail(u.getEmail())));
@@ -287,30 +276,39 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
 
     @Override
     public List<Gender> getGenders() {
+        logger.info("Method getGenders");
         return Arrays.asList(Gender.Monsieur, Gender.Madame);
     }
 
     private String buildFlattenRoles(List<Role> roles) {
+        logger.info("Method buildFlattenRoles");
         try {
             Optional<List<String>> list = Optional.of(roles.stream().map(Role::getName).collect(Collectors.toList()));
             String flattenRoles = list.get().stream().map(Object::toString).collect(Collectors.joining(", "));
             return flattenRoles;
         } catch (Exception ex) {
             //toDo
+            logger.error(ex.getMessage());
         }
         return null;
     }
 
-    @Transactional
     @Override
+    @Transactional(rollbackFor = CustomTransactionalException.class)
     public List<UserDTO> changeUserSatus(UserDTO userDTO) {
-        Optional<User> user = userRepository.findById(userDTO.getId());
-        if (userDTO.getStatus() == Status.ACTIVE) {
-            user.get().setStatus(Status.INACTIVE);
-        } else {
-            user.get().setStatus(Status.ACTIVE);
+        logger.info("Method changeUserSatus");
+        try {
+            Optional<User> user = userRepository.findById(userDTO.getId());
+            if (userDTO.getStatus() == Status.ACTIVE) {
+                user.get().setStatus(Status.INACTIVE);
+            } else {
+                user.get().setStatus(Status.ACTIVE);
+            }
+            userRepository.save(user.get());
+            return (List<UserDTO>) superModelMapper.convertToDTOs(userRepository.findAll());
+        }catch(CustomTransactionalException ex){
+            logger.error(ex.getMessage());
+            return Collections.emptyList();
         }
-        userRepository.save(user.get());
-        return (List<UserDTO>) superModelMapper.convertToDTOs(userRepository.findAll());
     }
 }

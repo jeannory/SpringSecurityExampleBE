@@ -1,5 +1,6 @@
 package com.example.security.singleton;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.log4j.Logger;
 import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.jwk.RsaJwkGenerator;
@@ -18,10 +19,10 @@ public class SingletonBean {
     private final static Logger logger = Logger.getLogger(SingletonBean.class);
     private static List<JsonWebKey> jsonWebKeys;
     private static ModelMapper modelMapper;
+    private static ObjectMapper objectMapper;
 
     public SingletonBean() {
-        logger.info("**********");
-        logger.info("Constructor SingletonBean begin");
+        logger.info("Constructor SingletonBean");
         List<Integer> listInt = Arrays.asList(1, 2, 3);
         jsonWebKeys = listInt.stream().map(i -> {
             try {
@@ -35,8 +36,7 @@ public class SingletonBean {
             }
         }).collect(Collectors.toCollection(ArrayList::new)).stream().filter(Objects::nonNull).collect(Collectors.toList());
         modelMapper = new ModelMapper();
-        logger.info("Constructor SingletonBean end");
-        logger.info("**********");
+        objectMapper = new ObjectMapper();
     }
 
     public List<JsonWebKey> getJsonWebKeys() {
@@ -45,5 +45,9 @@ public class SingletonBean {
 
     public ModelMapper getModelMapper() {
         return modelMapper;
+    }
+
+    public static ObjectMapper getObjectMapper() {
+        return objectMapper;
     }
 }
