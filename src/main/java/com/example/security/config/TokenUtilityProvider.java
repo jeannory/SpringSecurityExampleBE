@@ -7,7 +7,6 @@ import com.example.security.models.TokenUtility;
 import com.example.security.singleton.SingletonBean;
 import com.example.security.tools.ITools;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.log4j.Logger;
 import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.jwk.JsonWebKeySet;
@@ -38,6 +37,7 @@ public class TokenUtilityProvider implements ITools, Serializable {
     }
 
     public TokenUtility getTokenUtility(String token){
+        logger.info("Method getTokenUtility");
         try {
             tokenUtility = validateToken(token);
         } catch (CustomMalformedClaimException ex) {
@@ -61,24 +61,25 @@ public class TokenUtilityProvider implements ITools, Serializable {
     }
 
     private TokenUtility validateToken(String token) {
+        logger.info("Method validateToken");
         tokenUtility = new TokenUtility();
         try {
-            String kid = getStringFromJwtNode(token, 0, "kid");
-            String issuer = getStringFromJwtNode(token, 1, "iss");
+            final String kid = getStringFromJwtNode(token, 0, "kid");
+            final String issuer = getStringFromJwtNode(token, 1, "iss");
             /**
              * not in use
              */
-            String exp = getStringFromJwtNode(token, 1, "exp");
-            JsonWebKey jsonWebKey = validateJsonWebKey(kid);
+            final String exp = getStringFromJwtNode(token, 1, "exp");
+            final JsonWebKey jsonWebKey = validateJsonWebKey(kid);
             tokenUtility.setKid(Integer.valueOf(kid));
-            JwtConsumer jwtConsumer = new JwtConsumerBuilder()
+            final JwtConsumer jwtConsumer = new JwtConsumerBuilder()
                     .setRequireExpirationTime()
                     .setAllowedClockSkewInSeconds(120)
                     .setRequireSubject()
                     .setExpectedIssuer(issuer)
                     .setVerificationKey(jsonWebKey.getKey())
                     .build();
-            JwtClaims jwtClaims = jwtConsumer.processToClaims(token);
+            final JwtClaims jwtClaims = jwtConsumer.processToClaims(token);
             if (jwtClaims == null) {
                 throw new CustomJwtException("token is invalid");
             }
@@ -105,23 +106,23 @@ public class TokenUtilityProvider implements ITools, Serializable {
      * to calculate expiration of jwt
      */
     private Long millisecondsLeft(String exp) {
-        NumericDate jwtNumericDate = NumericDate.fromSeconds(Long.valueOf(exp));
-        NumericDate numericDateNow = NumericDate.now();
-        Long millisecondsLeft = jwtNumericDate.getValueInMillis() - numericDateNow.getValueInMillis();
+        logger.info("Method millisecondsLeft");
+        final NumericDate jwtNumericDate = NumericDate.fromSeconds(Long.valueOf(exp));
+        final NumericDate numericDateNow = NumericDate.now();
+        final Long millisecondsLeft = jwtNumericDate.getValueInMillis() - numericDateNow.getValueInMillis();
         return millisecondsLeft;
     }
 
     private String getStringFromJwtNode(String token, int indice, String nodeName) {
+        logger.info("Method getStringFromJwtNode");
         try {
-            String[] tokenTab = token.split("\\.");
-            String headerEncoded = tokenTab[indice];
-            byte[] decodeBytesHeader = Base64.getUrlDecoder().decode(headerEncoded);
-            String decodeHeader = new String(decodeBytesHeader);
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode rootNode;
-            rootNode = objectMapper.readValue(decodeHeader, JsonNode.class);
-            JsonNode node = rootNode.path(nodeName);
-            String kid = node.asText();
+            final String[] tokenTab = token.split("\\.");
+            final String headerEncoded = tokenTab[indice];
+            final byte[] decodeBytesHeader = Base64.getUrlDecoder().decode(headerEncoded);
+            final String decodeHeader = new String(decodeBytesHeader);
+            final JsonNode rootNode = singletonBean.getObjectMapper().readValue(decodeHeader, JsonNode.class);
+            final JsonNode node = rootNode.path(nodeName);
+            final String kid = node.asText();
             return kid;
         } catch (IOException ex) {
             throw new CustomJwtException("failed to get infos from the token");
@@ -131,12 +132,13 @@ public class TokenUtilityProvider implements ITools, Serializable {
     }
 
     private JsonWebKey validateJsonWebKey(String kid) {
+        logger.info("Method validateJsonWebKey");
         try {
             /**
              * get jsonWebKey by kid
              */
-            JsonWebKeySet jsonWebKeySet = new JsonWebKeySet(singletonBean.getJsonWebKeys());
-            JsonWebKey jsonWebKey = jsonWebKeySet.findJsonWebKey(kid, null, null, null);
+            final JsonWebKeySet jsonWebKeySet = new JsonWebKeySet(singletonBean.getJsonWebKeys());
+            final JsonWebKey jsonWebKey = jsonWebKeySet.findJsonWebKey(kid, null, null, null);
             return jsonWebKey;
         } catch (NullPointerException ex) {
             throw new CustomJwtException("failed to created JsonWebKeySet");

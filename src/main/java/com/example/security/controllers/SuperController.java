@@ -14,11 +14,13 @@ public class SuperController{
     private final static Logger logger = Logger.getLogger(SuperController.class);
 
     private UserDetails getSecurityContextHolder() {
+        logger.info("Method getSecurityContextHolder");
         final UsernamePasswordAuthenticationToken authentication = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         return (UserDetails) authentication.getPrincipal();
     }
 
     public String getEmailUser(){
+        logger.info("Method getEmailUser");
         return getSecurityContextHolder().getUsername();
     }
 
@@ -27,6 +29,7 @@ public class SuperController{
      * for all @Secure ROLE_ADMIN can access
      */
     public void validateThisUser(String emailEntry) {
+        logger.info("Method validateThisUser");
         try {
             final UserDetails userDetails = getSecurityContextHolder();
             boolean authorization = false;
@@ -38,11 +41,13 @@ public class SuperController{
                 }
             }
                 if(authorization==false){
+                    logger.error("Forbidden");
                     throw new ResponseStatusException(
                             HttpStatus.FORBIDDEN, "Forbidden"
                     );
                 }
         } catch (NullPointerException ex) {
+            logger.error("Forbidden");
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN, "Forbidden"
             );

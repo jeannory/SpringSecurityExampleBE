@@ -35,17 +35,18 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
+        logger.info("Method doFilterInternal");
         try {
-            String token = validateTokenHeader(httpServletRequest);
-            TokenUtility tokenUtility = tokenUtilityProvider.getTokenUtility(token);
+            final String token = validateTokenHeader(httpServletRequest);
+            final TokenUtility tokenUtility = tokenUtilityProvider.getTokenUtility(token);
             if (tokenUtility.isValidateToken()) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(tokenUtility.getEmail());
+                final UserDetails userDetails = userDetailsService.loadUserByUsername(tokenUtility.getEmail());
                 if(userDetails!=null){
                     List<SimpleGrantedAuthority> simpleGrantedAuthorities
                             = tokenUtility.getRoles().stream()
                             .map(role -> new SimpleGrantedAuthority(AUTHORITY_PREFIX + role))
                             .collect(Collectors.toCollection(ArrayList::new));
-                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, simpleGrantedAuthorities);
+                    final UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, simpleGrantedAuthorities);
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                     logger.info("Method doFilterInternal - token is valid");
@@ -62,9 +63,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
 
     private String validateTokenHeader(HttpServletRequest httpServletRequest) {
+        logger.info("Method validateTokenHeader");
         try {
             final String requestTokenHeader = httpServletRequest.getHeader(HEADER_STRING);
-            String token = requestTokenHeader.replace(TOKEN_PREFIX, "");
+            final String token = requestTokenHeader.replace(TOKEN_PREFIX, "");
             if (token == null) {
                 throw new CustomNoHeaderException("token not found on header");
             }

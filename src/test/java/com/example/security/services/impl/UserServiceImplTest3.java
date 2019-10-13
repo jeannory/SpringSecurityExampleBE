@@ -9,6 +9,7 @@ import com.example.security.entities.User;
 import com.example.security.enums.Gender;
 import com.example.security.exceptions.CustomJoseException;
 import com.example.security.exceptions.CustomTokenException;
+import com.example.security.exceptions.CustomTransactionalException;
 import com.example.security.models.Credential;
 import com.example.security.models.Token;
 import com.example.security.repositories.RoleRepository;
@@ -64,9 +65,7 @@ public class UserServiceImplTest3 implements ITools {
         userRole.setId(1L);
         userRole.setName(USER);
         Set<Role> userRoles = new HashSet<>(Collections.singletonList(userRole));
-
         Mockito.when(roleService.getUserRoleSet()).thenReturn(userRoles);
-
         final User user1 = Mockito.spy(new User());
         user1.setId(1L);
         user1.setEmail("jean@jean.com");
@@ -80,22 +79,16 @@ public class UserServiceImplTest3 implements ITools {
         user1.setZip("95000");
         user1.setCity("Cergy");
         user1.setDeliveryInformation("2ème étage");
-
         Mockito.when(superModelMapper.convertToEntity(Mockito.any(UserDTO.class))).thenReturn(Optional.of(user1));
         Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(user1);
-
         final Space space = Mockito.spy(new Space());
         space.setId(1L);
         space.setName("Espace de " + user1.getEmail());
         space.setUser(user1);
-
         Mockito.when(spaceRepository.save(Mockito.any(Space.class))).thenReturn(space);
-
         final Token token = Mockito.spy(new Token());
         token.setToken("fake token");
-
         Mockito.when(authProvider.validateConnection(Mockito.any(Credential.class))).thenReturn(token);
-
         final UserDTO userDTO = Mockito.spy(new UserDTO());
         userDTO.setId(1L);
         userDTO.setEmail("jean@jean.com");
@@ -124,9 +117,7 @@ public class UserServiceImplTest3 implements ITools {
         userRole.setId(1L);
         userRole.setName(USER);
         Set<Role> userRoles = new HashSet<>(Collections.singletonList(userRole));
-
         Mockito.when(roleService.getUserRoleSet()).thenReturn(userRoles);
-
         final User user1 = Mockito.spy(new User());
         user1.setId(1L);
         user1.setEmail("jean@jean.com");
@@ -140,19 +131,14 @@ public class UserServiceImplTest3 implements ITools {
         user1.setZip("95000");
         user1.setCity("Cergy");
         user1.setDeliveryInformation("2ème étage");
-
         Mockito.when(superModelMapper.convertToEntity(Mockito.any(UserDTO.class))).thenReturn(Optional.of(user1));
         Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(user1);
-
         final Space space = Mockito.spy(new Space());
         space.setId(1L);
         space.setName("Espace de " + user1.getEmail());
         space.setUser(user1);
-
         Mockito.when(spaceRepository.save(Mockito.any(Space.class))).thenReturn(space);
-
         List<String> rolesString = Collections.singletonList("USER");
-
         List<JsonWebKey> jsonWebKeys = Arrays.asList(
                 BuilderUtils.buildJsonWebKey(0),
                 BuilderUtils.buildJsonWebKey(1),
@@ -161,13 +147,10 @@ public class UserServiceImplTest3 implements ITools {
 
         final SingletonBean singletonBean = Mockito.mock(SingletonBean.class);
         Mockito.when(singletonBean.getJsonWebKeys()).thenReturn(jsonWebKeys);
-
         final JsonWebSignature jsonWebSignature = Mockito.spy(BuilderUtils.buildJsonWebSignature("jean@jean.com",
                 rolesString, 0, (RsaJsonWebKey) jsonWebKeys.get(0)));
         final String token2 = jsonWebSignature.getCompactSerialization();
-
         Mockito.when(jsonWebSignature.getCompactSerialization()).thenThrow(new CustomJoseException("Failed to generate token"));
-
         final UserDTO userDTO = Mockito.spy(new UserDTO());
         userDTO.setId(1L);
         userDTO.setEmail("jean@jean.com");
@@ -196,9 +179,7 @@ public class UserServiceImplTest3 implements ITools {
         userRole.setId(1L);
         userRole.setName(USER);
         Set<Role> userRoles = new HashSet<>(Collections.singletonList(userRole));
-
         Mockito.when(roleService.getUserRoleSet()).thenReturn(userRoles);
-
         final User user1 = Mockito.spy(new User());
         user1.setId(1L);
         user1.setEmail("jean@jean.com");
@@ -212,19 +193,15 @@ public class UserServiceImplTest3 implements ITools {
         user1.setZip("95000");
         user1.setCity("Cergy");
         user1.setDeliveryInformation("2ème étage");
-
         Mockito.when(superModelMapper.convertToEntity(Mockito.any(UserDTO.class))).thenReturn(Optional.of(user1));
         Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(user1);
-
         final Space space = Mockito.spy(new Space());
         space.setId(1L);
         space.setName("Espace de " + user1.getEmail());
         space.setUser(user1);
-
         Mockito.when(spaceRepository.save(Mockito.any(Space.class))).thenReturn(space);
         RoleRepository roleRepository = Mockito.mock(RoleRepository.class);
         Mockito.when(roleRepository.findByUsersEmail(Mockito.anyString())).thenThrow(new CustomTokenException("token must contain at least 1 role"));
-
         final UserDTO userDTO = Mockito.spy(new UserDTO());
         userDTO.setId(1L);
         userDTO.setEmail("jean@jean.com");
@@ -288,9 +265,7 @@ public class UserServiceImplTest3 implements ITools {
         userRole.setId(1L);
         userRole.setName(USER);
         Set<Role> userRoles = Collections.emptySet();
-
         Mockito.when(roleService.getUserRoleSet()).thenReturn(userRoles);
-
         final User user1 = Mockito.spy(new User());
         user1.setId(1L);
         user1.setEmail("jean@jean.com");
@@ -304,22 +279,16 @@ public class UserServiceImplTest3 implements ITools {
         user1.setZip("95000");
         user1.setCity("Cergy");
         user1.setDeliveryInformation("2ème étage");
-
         Mockito.when(superModelMapper.convertToEntity(Mockito.any(UserDTO.class))).thenReturn(Optional.of(user1));
         Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(user1);
-
         final Space space = Mockito.spy(new Space());
         space.setId(1L);
         space.setName("Espace de " + user1.getEmail());
         space.setUser(user1);
-
         Mockito.when(spaceRepository.save(Mockito.any(Space.class))).thenReturn(space);
-
         final Token token = Mockito.spy(new Token());
         token.setToken("fake token");
-
         Mockito.when(authProvider.validateConnection(Mockito.any(Credential.class))).thenReturn(token);
-
         final UserDTO userDTO = Mockito.spy(new UserDTO());
         userDTO.setId(1L);
         userDTO.setEmail("jean@jean.com");
@@ -348,11 +317,8 @@ public class UserServiceImplTest3 implements ITools {
         userRole.setId(1L);
         userRole.setName(USER);
         Set<Role> userRoles = new HashSet<>(Collections.singletonList(userRole));
-
         Mockito.when(roleService.getUserRoleSet()).thenReturn(userRoles);
-
         final User user1 = Mockito.spy(new User());
-//        user1.setId(1L);
         user1.setEmail("jean@jean.com");
         user1.setGender(Gender.Monsieur);
         user1.setFirstName("Jean");
@@ -364,22 +330,8 @@ public class UserServiceImplTest3 implements ITools {
         user1.setZip("95000");
         user1.setCity("Cergy");
         user1.setDeliveryInformation("2ème étage");
-
         Mockito.when(superModelMapper.convertToEntity(Mockito.any(UserDTO.class))).thenReturn(Optional.of(user1));
-        Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(user1);
-
-        final Space space = Mockito.spy(new Space());
-        space.setId(1L);
-        space.setName("Espace de " + user1.getEmail());
-        space.setUser(user1);
-
-        Mockito.when(spaceRepository.save(Mockito.any(Space.class))).thenReturn(space);
-
-        final Token token = Mockito.spy(new Token());
-        token.setToken("fake token");
-
-        Mockito.when(authProvider.validateConnection(Mockito.any(Credential.class))).thenReturn(token);
-
+        Mockito.when(userRepository.save(Mockito.any(User.class))).thenThrow(new CustomTransactionalException());
         final UserDTO userDTO = Mockito.spy(new UserDTO());
         userDTO.setId(1L);
         userDTO.setEmail("jean@jean.com");
@@ -408,9 +360,7 @@ public class UserServiceImplTest3 implements ITools {
         userRole.setId(1L);
         userRole.setName(USER);
         Set<Role> userRoles = new HashSet<>(Collections.singletonList(userRole));
-
         Mockito.when(roleService.getUserRoleSet()).thenReturn(userRoles);
-
         final User user1 = Mockito.spy(new User());
         user1.setId(1L);
         user1.setEmail("jean@jean.com");
@@ -424,22 +374,12 @@ public class UserServiceImplTest3 implements ITools {
         user1.setZip("95000");
         user1.setCity("Cergy");
         user1.setDeliveryInformation("2ème étage");
-
         Mockito.when(superModelMapper.convertToEntity(Mockito.any(UserDTO.class))).thenReturn(Optional.of(user1));
         Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(user1);
-
         final Space space = Mockito.spy(new Space());
-//        space.setId(1L);
         space.setName("Espace de " + user1.getEmail());
         space.setUser(user1);
-
-        Mockito.when(spaceRepository.save(Mockito.any(Space.class))).thenReturn(space);
-
-        final Token token = Mockito.spy(new Token());
-        token.setToken("fake token");
-
-        Mockito.when(authProvider.validateConnection(Mockito.any(Credential.class))).thenReturn(token);
-
+        Mockito.when(spaceRepository.save(Mockito.any(Space.class))).thenThrow(new CustomTransactionalException());
         final UserDTO userDTO = Mockito.spy(new UserDTO());
         userDTO.setId(1L);
         userDTO.setEmail("jean@jean.com");
