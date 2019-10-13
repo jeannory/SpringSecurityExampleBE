@@ -4,6 +4,7 @@ import com.example.security.config.AuthProvider;
 import com.example.security.config.JwtRequestFilter;
 import com.example.security.config.TokenUtilityProvider;
 import com.example.security.converter.SuperModelMapper;
+import com.example.security.converter.UserUserDTOConverter;
 import com.example.security.dtos.UserDTO;
 import com.example.security.entities.Role;
 import com.example.security.entities.Space;
@@ -55,6 +56,8 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
     private SpaceRepository spaceRepository;
     @Autowired
     private IRoleService roleService;
+    @Autowired
+    private UserUserDTOConverter userDTOConverter;
 
     @Transactional(rollbackFor = CustomTransactionalException.class)
     @Override
@@ -267,30 +270,22 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
     @Override
     public List<UserDTO> getUsers() {
         logger.info("Method getUsers");
-        List<UserDTO> userDTOS = (List<UserDTO>) superModelMapper.convertToDTOs(userRepository.findAll());
-        userDTOS.forEach(u -> {
-            u.setFlattenRoles(buildFlattenRoles(roleRepository.findByUsersEmail(u.getEmail())));
-        });
-        return userDTOS;
+        try {
+            final List<User> users = userRepository.findAll();
+            if (users.isEmpty()) {
+                return Collections.emptyList();
+            }
+            return userDTOConverter.convertToUserDTOs(users);
+        }catch(NullPointerException ex){
+            logger.error(ex.getMessage());
+            return Collections.emptyList();
+        }
     }
 
     @Override
     public List<Gender> getGenders() {
         logger.info("Method getGenders");
         return Arrays.asList(Gender.Monsieur, Gender.Madame);
-    }
-
-    private String buildFlattenRoles(List<Role> roles) {
-        logger.info("Method buildFlattenRoles");
-        try {
-            Optional<List<String>> list = Optional.of(roles.stream().map(Role::getName).collect(Collectors.toList()));
-            String flattenRoles = list.get().stream().map(Object::toString).collect(Collectors.joining(", "));
-            return flattenRoles;
-        } catch (Exception ex) {
-            //toDo
-            logger.error(ex.getMessage());
-        }
-        return null;
     }
 
     @Override

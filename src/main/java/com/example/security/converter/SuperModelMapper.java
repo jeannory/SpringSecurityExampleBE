@@ -6,7 +6,7 @@ import com.example.security.exceptions.CustomConverterException;
 import com.example.security.singleton.SingletonBean;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Service
+@Component
 public class SuperModelMapper<E extends SuperEntity, D extends SuperDTO> {
 
     private final static Logger logger = Logger.getLogger(SuperModelMapper.class);
