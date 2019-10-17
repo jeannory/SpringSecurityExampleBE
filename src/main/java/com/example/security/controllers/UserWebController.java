@@ -4,6 +4,7 @@ import com.example.security.config.AuthProvider;
 import com.example.security.dtos.RoleDTO;
 import com.example.security.dtos.UserDTO;
 import com.example.security.enums.Gender;
+import com.example.security.exceptions.CustomConverterException;
 import com.example.security.models.Credential;
 import com.example.security.models.Token;
 import com.example.security.services.IRoleService;
@@ -84,7 +85,7 @@ public class UserWebController extends SuperController {
 
     //http://localhost:8080/api/UserWebController/registerUser
     @RequestMapping(value = "/registerUser", method = RequestMethod.POST)
-    public Token registerUser(@RequestBody UserDTO userDTOEntry) {
+    public Token registerUser(@RequestBody UserDTO userDTOEntry) throws CustomConverterException {
         logger.info("End point registerUser");
         final Token token = userService.generateUser(userDTOEntry);
         if (token == null) {
@@ -125,7 +126,7 @@ public class UserWebController extends SuperController {
     //http://localhost:8080/api/UserWebController/getUsers
     @Secured({AUTHORITY_PREFIX + ADMIN})
     @RequestMapping(path = "/getUsers", method = RequestMethod.GET)
-    public List<UserDTO> getUsers()  {
+    public List<UserDTO> getUsers() throws CustomConverterException {
         logger.info("End point getUsers");
         List<UserDTO> userDTOS = userService.getUsers();
         if (userDTOS.isEmpty() || userDTOS == null) {
@@ -152,7 +153,7 @@ public class UserWebController extends SuperController {
     //http://localhost:8080/api/UserWebController/putUserRoles
     @Secured({AUTHORITY_PREFIX + ADMIN})
     @RequestMapping(path = "/putUserRoles", method = RequestMethod.PUT)
-    public List<UserDTO> putUserRoles(@RequestParam("email") String email, @RequestBody List<RoleDTO> roleDTOS) {
+    public List<UserDTO> putUserRoles(@RequestParam("email") String email, @RequestBody List<RoleDTO> roleDTOS) throws CustomConverterException {
         logger.info("End point putUserRoles");
         List<UserDTO> userDTOS = roleService.putUserRoles(email, roleDTOS);
         if (userDTOS.isEmpty()) {
@@ -174,7 +175,7 @@ public class UserWebController extends SuperController {
     //http://localhost:8080/api/UserWebController/changeUserSatus
     @Secured({AUTHORITY_PREFIX + ADMIN})
     @RequestMapping(path = "/changeUserSatus", method = RequestMethod.PUT)
-    public List<UserDTO> changeUserSatus(@RequestBody UserDTO userDTO) {
+    public List<UserDTO> changeUserSatus(@RequestBody UserDTO userDTO) throws CustomConverterException {
         logger.info("End point changeUserSatus");
         List<UserDTO> userDTOS = userService.changeUserSatus(userDTO);
         if (userDTOS.isEmpty()) {

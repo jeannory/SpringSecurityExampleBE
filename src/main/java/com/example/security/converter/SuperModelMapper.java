@@ -2,6 +2,7 @@ package com.example.security.converter;
 
 import com.example.security.dtos.SuperDTO;
 import com.example.security.entities.SuperEntity;
+import com.example.security.exceptions.CustomConverterException;
 import com.example.security.singleton.SingletonBean;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -21,31 +21,53 @@ public class SuperModelMapper<E extends SuperEntity, D extends SuperDTO> {
     @Autowired
     private SingletonBean singletonBean;
 
-    public Optional<D> convertToDTO(E entity) {
+    public Optional<D> convertToDTO(E entity1) {
         logger.info("Method convertToDTO");
-        if (entity == null) {
-            return Optional.empty();
+        try {
+            final E entity2 = validateEntity(entity1);
+            final D dto = singletonBean.getModelMapper().map(entity2, (Type) entity2.getDTOClass());
+            return Optional.of(dto);
+        } catch (CustomConverterException ex) {
+            logger.error(ex.getMessage());
+            return null;
         }
-        final D dto = singletonBean.getModelMapper().map(entity, (Type) entity.getDTOClass());
-        return Optional.of(dto);
     }
 
-    public Optional<E> convertToEntity(D dto) {
-        logger.info("Method convertToEntity");
-        if (dto == null) {
-            return Optional.empty();
+    private E validateEntity(E entity) {
+        logger.info("Method validateEntity");
+        if (entity == null) {
+            throw new CustomConverterException("Entity cannot be null");
         }
-        final E entity = singletonBean.getModelMapper().map(dto, (Type) dto.getEntityClass());
-        return Optional.of(entity);
+        return entity;
+    }
+
+    public Optional<E> convertToEntity(D dto1) {
+        logger.info("Method convertToEntity");
+        try {
+            final D dto2 = validateDTO(dto1);
+            final E entiy = singletonBean.getModelMapper().map(dto2, (Type) dto2.getEntityClass());
+            return Optional.of(entiy);
+        } catch (CustomConverterException ex) {
+            logger.error(ex.getMessage());
+            return null;
+        }
+    }
+
+    private D validateDTO(D dto) {
+        logger.info("Method validateDTO");
+        if (dto == null) {
+            throw new CustomConverterException("Dto cannot be null");
+        }
+        return dto;
     }
 
     public List<D> convertToDTOs(List<E> entities) {
         logger.info("Method convertToDTOs");
         return entities.stream().map(entity -> {
-            final Optional<D> dto = convertToDTO(entity);
             try {
+                final Optional<D> dto = convertToDTO(entity);
                 return dto.get();
-            } catch (NoSuchElementException ex) {
+            } catch (CustomConverterException ex) {
                 logger.error(ex.getMessage());
                 return null;
             }
@@ -55,10 +77,10 @@ public class SuperModelMapper<E extends SuperEntity, D extends SuperDTO> {
     public List<E> convertToEntities(List<D> dtos) {
         logger.info("Method convertToEntities");
         return dtos.stream().map(dto -> {
-            final Optional<E> entity = convertToEntity(dto);
-            try{
-            return entity.get();
-            } catch (NoSuchElementException ex) {
+            try {
+                final Optional<E> entity = convertToEntity(dto);
+                return entity.get();
+            } catch (CustomConverterException ex) {
                 logger.error(ex.getMessage());
                 return null;
             }

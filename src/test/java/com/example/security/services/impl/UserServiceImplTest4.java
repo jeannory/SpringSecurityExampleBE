@@ -6,6 +6,7 @@ import com.example.security.dtos.UserDTO;
 import com.example.security.entities.User;
 import com.example.security.enums.Gender;
 import com.example.security.enums.Status;
+import com.example.security.exceptions.CustomConverterException;
 import com.example.security.exceptions.CustomTransactionalException;
 import com.example.security.repositories.UserRepository;
 import com.example.security.services.IUserService;
@@ -140,7 +141,7 @@ public class UserServiceImplTest4 {
         user.setCity(userDTO.getCity());
         user.setDeliveryInformation(userDTO.getDeliveryInformation());
         Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(user);
-        Mockito.when(superModelMapper.convertToDTO(Mockito.any(User.class))).thenReturn(Optional.empty());
+        Mockito.when(superModelMapper.convertToDTO(Mockito.any(User.class))).thenThrow(new CustomConverterException());
 
         //when
         final UserDTO result = userService.setUser(userDTO);
