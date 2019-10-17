@@ -5,7 +5,6 @@ import com.example.security.dtos.RoleDTO;
 import com.example.security.dtos.UserDTO;
 import com.example.security.entities.Role;
 import com.example.security.entities.User;
-import com.example.security.exceptions.CustomConverterException;
 import com.example.security.exceptions.CustomTransactionalException;
 import com.example.security.repositories.RoleRepository;
 import com.example.security.repositories.UserRepository;
@@ -115,7 +114,7 @@ public class RoleServiceImpl implements IRoleService {
 
     @Override
     @Transactional(rollbackFor = CustomTransactionalException.class)
-    public List<UserDTO> putUserRoles(String email, List<RoleDTO> roleDTOS) throws CustomConverterException{
+    public List<UserDTO> putUserRoles(String email, List<RoleDTO> roleDTOS){
         logger.info("Method putUserRoles");
         try {
             final User user = userRepository.findByEmail(email);
