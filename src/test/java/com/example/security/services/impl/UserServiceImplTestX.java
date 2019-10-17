@@ -5,7 +5,7 @@ import com.example.security.dtos.UserDTO;
 import com.example.security.entities.User;
 import com.example.security.enums.Gender;
 import com.example.security.enums.Status;
-import com.example.security.exceptions.CustomConverterException;
+//import com.example.security.exceptions.CustomConverterException;
 import com.example.security.repositories.UserRepository;
 import com.example.security.utils.BuilderUtils;
 import org.junit.Assert;
@@ -40,7 +40,7 @@ public class UserServiceImplTestX {
 
     //method and test should be upgrade because space could'nt be null
     @Test
-    public void test_changeUserSatus_should_return_value_when_all_parameters_valid() throws CustomConverterException {
+    public void test_changeUserSatus_should_return_value_when_all_parameters_valid()  {
         //given
         final UserDTO userDTO = BuilderUtils.buildUserDTO(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", null, "USER, MANAGER, ADMIN", Status.ACTIVE);

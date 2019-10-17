@@ -11,8 +11,6 @@ import com.example.security.entities.Space;
 import com.example.security.entities.User;
 import com.example.security.enums.Gender;
 import com.example.security.enums.Status;
-import com.example.security.exceptions.CustomConverterException;
-import com.example.security.exceptions.CustomInitializationException;
 import com.example.security.exceptions.CustomTransactionalException;
 import com.example.security.models.Credential;
 import com.example.security.models.Token;
@@ -187,9 +185,6 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
                 return null;
             }
             return (UserDTO) superModelMapper.convertToDTO(user).get();
-        } catch (CustomConverterException ex) {
-            logger.error(ex.getMessage());
-            return null;
         } catch (NoSuchElementException ex) {
             logger.error(ex.getMessage());
             return null;
@@ -261,7 +256,7 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
         try {
             final UserDTO userDTOReturn = (UserDTO) superModelMapper.convertToDTO(user).get();
             return userDTOReturn;
-        } catch (CustomConverterException ex) {
+        }catch(NoSuchElementException ex){
             logger.error(ex.getMessage());
             return null;
         }
