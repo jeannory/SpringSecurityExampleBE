@@ -32,21 +32,28 @@ import static com.example.security.contants.Constants.DOMAIN;
 public class BuilderUtils {
 
     public static User buildUser(
-            Long id, String email, String password, Gender gender, String firstName, String lastName, String phoneNumber,
+            String email, String password, Gender gender, String firstName, String lastName, String phoneNumber,
             String adress, String zip, String city, String deliveryInformation, Status status) {
         final User user = new User();
-        user.setId(id);
         user.setEmail(email);
         user.setPassword(password);
         user.setGender(gender);
         user.setFirstName(firstName);
         user.setLastName(lastName);
         user.setPhoneNumber(phoneNumber);
-        user.setAdress(adress);
+        user.setAddress(adress);
         user.setZip(zip);
         user.setCity(city);
         user.setDeliveryInformation(deliveryInformation);
         user.setStatus(status);
+        return user;
+    }
+
+    public static User buildUser(
+            Long id, String email, String password, Gender gender, String firstName, String lastName, String phoneNumber,
+            String adress, String zip, String city, String deliveryInformation, Status status) {
+        final User user = buildUser(email, password, gender, firstName, lastName, phoneNumber, adress, zip, city, deliveryInformation, status);
+        user.setId(id);
         return user;
     }
 
@@ -79,7 +86,7 @@ public class BuilderUtils {
         userDTO.setFirstName(firstName);
         userDTO.setLastName(lastName);
         userDTO.setPhoneNumber(phoneNumber);
-        userDTO.setAdress(adress);
+        userDTO.setAddress(adress);
         userDTO.setZip(zip);
         userDTO.setCity(city);
         userDTO.setDeliveryInformation(deliveryInformation);

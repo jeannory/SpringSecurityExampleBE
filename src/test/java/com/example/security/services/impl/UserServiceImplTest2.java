@@ -13,14 +13,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.*;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.*;
 
-@PrepareForTest({UserServiceImpl.class})
 public class UserServiceImplTest2 {
 
     @InjectMocks
@@ -164,7 +162,7 @@ public class UserServiceImplTest2 {
         //then
         Assert.assertEquals("jean@jean.com", result.getEmail());
         Assert.assertEquals("1234", result.getPassword());
-        Assert.assertEquals("9 rue du roi", result.getAdress());
+        Assert.assertEquals("9 rue du roi", result.getAddress());
         Assert.assertEquals("0101010101", result.getPhoneNumber());
         Assert.assertEquals("ADMIN, COOKER, USER", result.getFlattenRoles());
     }

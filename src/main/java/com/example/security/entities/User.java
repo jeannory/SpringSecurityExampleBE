@@ -23,7 +23,7 @@ public class User extends SuperEntity{
     private String firstName;
     private String lastName;
     private String phoneNumber;
-    private String adress;
+    private String address;
     private String zip;
     private String city;
     private String deliveryInformation;
@@ -105,12 +105,12 @@ public class User extends SuperEntity{
         this.phoneNumber = phoneNumber;
     }
 
-    public String getAdress() {
-        return adress;
+    public String getAddress() {
+        return address;
     }
 
-    public void setAdress(String adress) {
-        this.adress = adress;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getZip() {

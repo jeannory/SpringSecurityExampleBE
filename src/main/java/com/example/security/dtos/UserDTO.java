@@ -12,7 +12,7 @@ public class UserDTO extends SuperDTO{
     private String firstName;
     private String lastName;
     private String phoneNumber;
-    private String adress;
+    private String address;
     private String zip;
     private String city;
     private String deliveryInformation;
@@ -72,12 +72,12 @@ public class UserDTO extends SuperDTO{
         this.phoneNumber = phoneNumber;
     }
 
-    public String getAdress() {
-        return adress;
+    public String getAddress() {
+        return address;
     }
 
-    public void setAdress(String adress) {
-        this.adress = adress;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getZip() {

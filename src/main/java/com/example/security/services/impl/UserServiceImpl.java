@@ -1,7 +1,6 @@
 package com.example.security.services.impl;
 
 import com.example.security.config.AuthProvider;
-import com.example.security.config.JwtRequestFilter;
 import com.example.security.config.TokenUtilityProvider;
 import com.example.security.converter.SuperModelMapper;
 import com.example.security.converter.UserUserDTOConverter;
@@ -12,7 +11,6 @@ import com.example.security.entities.User;
 import com.example.security.enums.Gender;
 import com.example.security.enums.Status;
 import com.example.security.exceptions.CustomConverterException;
-import com.example.security.exceptions.CustomInitializationException;
 import com.example.security.exceptions.CustomTransactionalException;
 import com.example.security.models.Credential;
 import com.example.security.models.Token;
@@ -87,7 +85,7 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
             user1.setPassword(getStringSha3("0000"));
             user1.setRoles(adminRoles);
             user1.setPhoneNumber("0606060606");
-            user1.setAdress("3 rue du Roi");
+            user1.setAddress("3 rue du Roi");
             user1.setZip("95000");
             user1.setCity("Cergy");
             user1.setDeliveryInformation("2ème étage");
@@ -249,7 +247,7 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
             user.setFirstName(userDTO.getFirstName());
             user.setLastName(userDTO.getLastName());
             user.setPhoneNumber((userDTO.getPhoneNumber()));
-            user.setAdress(userDTO.getAdress());
+            user.setAddress(userDTO.getAddress());
             user.setZip(userDTO.getZip());
             user.setCity(userDTO.getCity());
             user.setDeliveryInformation(userDTO.getDeliveryInformation());
