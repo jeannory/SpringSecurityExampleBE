@@ -72,7 +72,7 @@ public class UserServiceImplTest1 implements ITools {
         user1.setPassword(getStringSha3("0000"));
         user1.setRoles(adminRoles);
         user1.setPhoneNumber("0606060606");
-        user1.setAdress("3 rue du Roi");
+        user1.setAddress("3 rue du Roi");
         user1.setZip("95000");
         user1.setCity("Cergy");
         user1.setDeliveryInformation("2ème étage");
@@ -183,7 +183,7 @@ public class UserServiceImplTest1 implements ITools {
         user1.setPassword(getStringSha3("0000"));
         user1.setRoles(adminRoles);
         user1.setPhoneNumber("0606060606");
-        user1.setAdress("3 rue du Roi");
+        user1.setAddress("3 rue du Roi");
         user1.setZip("95000");
         user1.setCity("Cergy");
         user1.setDeliveryInformation("2ème étage");

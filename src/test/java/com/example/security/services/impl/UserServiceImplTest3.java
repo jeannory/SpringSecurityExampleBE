@@ -75,7 +75,7 @@ public class UserServiceImplTest3 implements ITools {
         user1.setPassword(getStringSha3("0000"));
         user1.setRoles(userRoles);
         user1.setPhoneNumber("0606060606");
-        user1.setAdress("3 rue du Roi");
+        user1.setAddress("3 rue du Roi");
         user1.setZip("95000");
         user1.setCity("Cergy");
         user1.setDeliveryInformation("2ème étage");
@@ -98,7 +98,7 @@ public class UserServiceImplTest3 implements ITools {
         userDTO.setPassword(getStringSha3("0000"));
         userDTO.setFlattenRoles("USER");
         userDTO.setPhoneNumber("0606060606");
-        userDTO.setAdress("3 rue du Roi");
+        userDTO.setAddress("3 rue du Roi");
         userDTO.setZip("95000");
         userDTO.setCity("Cergy");
         userDTO.setDeliveryInformation("2ème étage");
@@ -127,7 +127,7 @@ public class UserServiceImplTest3 implements ITools {
         user1.setPassword(getStringSha3("0000"));
         user1.setRoles(userRoles);
         user1.setPhoneNumber("0606060606");
-        user1.setAdress("3 rue du Roi");
+        user1.setAddress("3 rue du Roi");
         user1.setZip("95000");
         user1.setCity("Cergy");
         user1.setDeliveryInformation("2ème étage");
@@ -160,7 +160,7 @@ public class UserServiceImplTest3 implements ITools {
         userDTO.setPassword(getStringSha3("0000"));
         userDTO.setFlattenRoles("USER");
         userDTO.setPhoneNumber("0606060606");
-        userDTO.setAdress("3 rue du Roi");
+        userDTO.setAddress("3 rue du Roi");
         userDTO.setZip("95000");
         userDTO.setCity("Cergy");
         userDTO.setDeliveryInformation("2ème étage");
@@ -189,7 +189,7 @@ public class UserServiceImplTest3 implements ITools {
         user1.setPassword(getStringSha3("0000"));
         user1.setRoles(userRoles);
         user1.setPhoneNumber("0606060606");
-        user1.setAdress("3 rue du Roi");
+        user1.setAddress("3 rue du Roi");
         user1.setZip("95000");
         user1.setCity("Cergy");
         user1.setDeliveryInformation("2ème étage");
@@ -211,7 +211,7 @@ public class UserServiceImplTest3 implements ITools {
         userDTO.setPassword(getStringSha3("0000"));
         userDTO.setFlattenRoles("USER");
         userDTO.setPhoneNumber("0606060606");
-        userDTO.setAdress("3 rue du Roi");
+        userDTO.setAddress("3 rue du Roi");
         userDTO.setZip("95000");
         userDTO.setCity("Cergy");
         userDTO.setDeliveryInformation("2ème étage");
@@ -246,7 +246,7 @@ public class UserServiceImplTest3 implements ITools {
         userDTO.setPassword(getStringSha3("0000"));
         userDTO.setFlattenRoles("USER");
         userDTO.setPhoneNumber("0606060606");
-        userDTO.setAdress("3 rue du Roi");
+        userDTO.setAddress("3 rue du Roi");
         userDTO.setZip("95000");
         userDTO.setCity("Cergy");
         userDTO.setDeliveryInformation("2ème étage");
@@ -275,7 +275,7 @@ public class UserServiceImplTest3 implements ITools {
         user1.setPassword(getStringSha3("0000"));
         user1.setRoles(userRoles);
         user1.setPhoneNumber("0606060606");
-        user1.setAdress("3 rue du Roi");
+        user1.setAddress("3 rue du Roi");
         user1.setZip("95000");
         user1.setCity("Cergy");
         user1.setDeliveryInformation("2ème étage");
@@ -298,7 +298,7 @@ public class UserServiceImplTest3 implements ITools {
         userDTO.setPassword(getStringSha3("0000"));
         userDTO.setFlattenRoles("USER");
         userDTO.setPhoneNumber("0606060606");
-        userDTO.setAdress("3 rue du Roi");
+        userDTO.setAddress("3 rue du Roi");
         userDTO.setZip("95000");
         userDTO.setCity("Cergy");
         userDTO.setDeliveryInformation("2ème étage");
@@ -326,7 +326,7 @@ public class UserServiceImplTest3 implements ITools {
         user1.setPassword(getStringSha3("0000"));
         user1.setRoles(userRoles);
         user1.setPhoneNumber("0606060606");
-        user1.setAdress("3 rue du Roi");
+        user1.setAddress("3 rue du Roi");
         user1.setZip("95000");
         user1.setCity("Cergy");
         user1.setDeliveryInformation("2ème étage");
@@ -341,7 +341,7 @@ public class UserServiceImplTest3 implements ITools {
         userDTO.setPassword(getStringSha3("0000"));
         userDTO.setFlattenRoles("USER");
         userDTO.setPhoneNumber("0606060606");
-        userDTO.setAdress("3 rue du Roi");
+        userDTO.setAddress("3 rue du Roi");
         userDTO.setZip("95000");
         userDTO.setCity("Cergy");
         userDTO.setDeliveryInformation("2ème étage");
@@ -370,7 +370,7 @@ public class UserServiceImplTest3 implements ITools {
         user1.setPassword(getStringSha3("0000"));
         user1.setRoles(userRoles);
         user1.setPhoneNumber("0606060606");
-        user1.setAdress("3 rue du Roi");
+        user1.setAddress("3 rue du Roi");
         user1.setZip("95000");
         user1.setCity("Cergy");
         user1.setDeliveryInformation("2ème étage");
@@ -389,7 +389,7 @@ public class UserServiceImplTest3 implements ITools {
         userDTO.setPassword(getStringSha3("0000"));
         userDTO.setFlattenRoles("USER");
         userDTO.setPhoneNumber("0606060606");
-        userDTO.setAdress("3 rue du Roi");
+        userDTO.setAddress("3 rue du Roi");
         userDTO.setZip("95000");
         userDTO.setCity("Cergy");
         userDTO.setDeliveryInformation("2ème étage");

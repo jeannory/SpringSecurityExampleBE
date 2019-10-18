@@ -15,13 +15,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-@PrepareForTest({UserServiceImpl.class})
 public class UserServiceImplTestX {
 
     @InjectMocks

@@ -52,7 +52,7 @@ public class UserServiceImplTest4 {
         user.setFirstName(userDTO.getFirstName());
         user.setLastName(userDTO.getLastName());
         user.setPhoneNumber((userDTO.getPhoneNumber()));
-        user.setAdress(userDTO.getAdress());
+        user.setAddress(userDTO.getAddress());
         user.setZip(userDTO.getZip());
         user.setCity(userDTO.getCity());
         user.setDeliveryInformation(userDTO.getDeliveryInformation());
@@ -109,7 +109,7 @@ public class UserServiceImplTest4 {
         user.setFirstName(userDTO.getFirstName());
         user.setLastName(userDTO.getLastName());
         user.setPhoneNumber((userDTO.getPhoneNumber()));
-        user.setAdress(userDTO.getAdress());
+        user.setAddress(userDTO.getAddress());
         user.setZip(userDTO.getZip());
         user.setCity(userDTO.getCity());
         user.setDeliveryInformation(userDTO.getDeliveryInformation());
@@ -136,7 +136,7 @@ public class UserServiceImplTest4 {
         user.setFirstName(userDTO.getFirstName());
         user.setLastName(userDTO.getLastName());
         user.setPhoneNumber((userDTO.getPhoneNumber()));
-        user.setAdress(userDTO.getAdress());
+        user.setAddress(userDTO.getAddress());
         user.setZip(userDTO.getZip());
         user.setCity(userDTO.getCity());
         user.setDeliveryInformation(userDTO.getDeliveryInformation());
