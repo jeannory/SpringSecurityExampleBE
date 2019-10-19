@@ -33,6 +33,7 @@ public class UserWebController extends SuperController {
     @Autowired
     private AuthProvider authProvider;
 
+    //http://localhost:8080/Main/api/UserWebController/getDataTest
     //http://localhost:8080/api/UserWebController/getDataTest
     @RequestMapping(path = "/getDataTest", method = RequestMethod.GET)
     public String getDataTest() {
