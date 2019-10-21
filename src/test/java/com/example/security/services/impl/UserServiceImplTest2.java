@@ -6,7 +6,6 @@ import com.example.security.entities.Role;
 import com.example.security.entities.User;
 import com.example.security.enums.Gender;
 import com.example.security.enums.Status;
-import com.example.security.exceptions.CustomConverterException;
 import com.example.security.repositories.UserRepository;
 import com.example.security.utils.BuilderUtils;
 import org.junit.Assert;
@@ -147,7 +146,7 @@ public class UserServiceImplTest2 {
     }
 
     @Test
-    public void test_findUserDTOByEmail_with_all_parameters_valid_should_return_result() throws CustomConverterException {
+    public void test_findUserDTOByEmail_with_all_parameters_valid_should_return_result()  {
         //given
         final User user = BuilderUtils.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Arrays.asList(Arrays.asList("1","USER"), Arrays.asList("2","COOKER"), Arrays.asList("3","ADMIN")));
@@ -168,7 +167,7 @@ public class UserServiceImplTest2 {
     }
 
     @Test
-    public void test_findUserDTOByEmail_with_user_not_found() throws CustomConverterException {
+    public void test_findUserDTOByEmail_with_user_not_found(){
         //given
         final User user = null;
         Mockito.when(userRepository.findByEmail(Mockito.eq("jean@jean.com"))).thenReturn(user);
@@ -184,7 +183,7 @@ public class UserServiceImplTest2 {
     }
 
     @Test
-    public void test_findUserDTOByEmail_with_conversion_return_null() throws CustomConverterException {
+    public void test_findUserDTOByEmail_with_conversion_return_null()  {
         //given
         final User user = BuilderUtils.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Arrays.asList(Arrays.asList("1","USER"), Arrays.asList("2","COOKER"), Arrays.asList("3","ADMIN")));
@@ -200,12 +199,12 @@ public class UserServiceImplTest2 {
     }
 
     @Test
-    public void test_findUserDTOByEmail_when_throws_CustomConverterException_return_null() throws CustomConverterException {
+    public void test_findUserDTOByEmail_when_convertToDTO_return_optional_empty_should_return_null() {
         //given
         final User user = BuilderUtils.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Arrays.asList(Arrays.asList("1","USER"), Arrays.asList("2","COOKER"), Arrays.asList("3","ADMIN")));
         Mockito.when(userRepository.findByEmail(Mockito.eq("jean@jean.com"))).thenReturn(user);
-        Mockito.when(superModelMapper.convertToDTO(user)).thenThrow(new CustomConverterException("Conversion failed"));
+        Mockito.when(superModelMapper.convertToDTO(user)).thenReturn(Optional.empty());
 
         //when
         final UserDTO result = userService.findUserDTOByEmail("jean@jean.com");
