@@ -24,6 +24,7 @@ public class UserUserDTOConverter {
             return Optional.empty();
         }
             final UserDTO userDTO = singletonBean.getModelMapper().map(user, UserDTO.class);
+            userDTO.setPassword(null);
             userDTO.setFlattenRoles(buildFlattenRoles(new ArrayList<>(user.getRoles())));
             return Optional.of(userDTO);
     }

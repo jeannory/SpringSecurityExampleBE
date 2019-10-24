@@ -5,7 +5,7 @@ import com.example.security.entities.User;
 import com.example.security.enums.Gender;
 import com.example.security.enums.Status;
 import com.example.security.singleton.SingletonBean;
-import com.example.security.utils.BuilderUtils;
+import com.example.security.utils.BuilderUtils1;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,8 +17,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
-import static org.junit.Assert.*;
 
 public class UserUserDTOConverterTest {
 
@@ -35,7 +33,7 @@ public class UserUserDTOConverterTest {
     @Test
     public void test_convertToUserDTO_when_all_parameters_valid_should_return_result(){
         //given
-        final User user = BuilderUtils.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
+        final User user = BuilderUtils1.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Arrays.asList(Arrays.asList("1","USER"), Arrays.asList("2","MANAGER"), Arrays.asList("3","ADMIN")));
         Mockito.when(singletonBean.getModelMapper()).thenReturn(new ModelMapper());
 
@@ -63,7 +61,7 @@ public class UserUserDTOConverterTest {
     @Test
     public void test_convertToUserDTO_when_roles_is_empty_valid_should_optional_empty(){
         //given
-        final User user = BuilderUtils.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
+        final User user = BuilderUtils1.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Collections.emptyList());
         Mockito.when(singletonBean.getModelMapper()).thenReturn(new ModelMapper());
 
@@ -77,9 +75,9 @@ public class UserUserDTOConverterTest {
     @Test
     public void test_convertToUserDTOs_when_all_parameters_valid_should_return_results(){
         //given
-        final User user1 = BuilderUtils.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
+        final User user1 = BuilderUtils1.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Arrays.asList(Arrays.asList("1","USER"), Arrays.asList("2","MANAGER"), Arrays.asList("3","ADMIN")));
-        final User user2 = BuilderUtils.buildUser(2L, "jeanne@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
+        final User user2 = BuilderUtils1.buildUser(2L, "jeanne@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Arrays.asList(Arrays.asList("1","USER"), Arrays.asList("2","MANAGER")));
         final List<User> users = Arrays.asList(user1, user2);
         Mockito.when(singletonBean.getModelMapper()).thenReturn(new ModelMapper());
@@ -98,7 +96,7 @@ public class UserUserDTOConverterTest {
     @Test
     public void test_convertToUserDTOs_when_1_user_is_null_should_return_results_with_1_user(){
         //given
-        final User user1 = BuilderUtils.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
+        final User user1 = BuilderUtils1.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Arrays.asList(Arrays.asList("1","USER"), Arrays.asList("2","MANAGER"), Arrays.asList("3","ADMIN")));
         final User user2 = null;
         final List<User> users = Arrays.asList(user1, user2);
@@ -116,7 +114,7 @@ public class UserUserDTOConverterTest {
     @Test
     public void test_convertToUserDTOs_when_convertToUserDTO_return_empty_should_return_empty_list(){
         //given
-        final User user1 = BuilderUtils.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
+        final User user1 = BuilderUtils1.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Arrays.asList(Arrays.asList("1","USER"), Arrays.asList("2","MANAGER"), Arrays.asList("3","ADMIN")));
         final User user2 = null;
         final List<User> users = Arrays.asList(user1, user2);

@@ -40,53 +40,72 @@ public class UserWebController extends SuperController {
         if (userService.getDataTest()) {
             return "success";
         } else {
-            logger.error("Internal server error");
+            logger.error("Internal server error 500");
             throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"
+                    HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error 500"
             );
         }
     }
 
     //http://localhost:8080/api/UserWebController/validateConnection
     @RequestMapping(path = "/validateConnection", method = RequestMethod.POST)
-    public Token validateConnection(@RequestBody Credential credential) {
+    public Token validateConnection(@RequestBody final Credential credential) {
         logger.info("End point validateConnection");
         return validateToken(credential);
     }
 
-    private Token validateToken(Credential credential) {
+    private Token validateToken(final Credential credential) {
         logger.info("Method validateToken");
         final Token token = authProvider.validateConnection(credential);
         if (token == null) {
-            logger.error("Unauthorized");
+            logger.error("Unauthorized 401");
             throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED, "Unauthorized"
+                    HttpStatus.UNAUTHORIZED, "Unauthorized 401"
             );
         }
         return token;
     }
 
-    //http://localhost:8080/api/UserWebController/getUserDto?email=jean@jean.com
+    //http://localhost:8080/api/UserWebController/getUser?email=jean@jean.com
     @Secured({AUTHORITY_PREFIX + USER, AUTHORITY_PREFIX + MANAGER, AUTHORITY_PREFIX + ADMIN})
-    @RequestMapping(path = "/getUserDto", method = RequestMethod.GET)
-    public UserDTO getUserDto(@RequestParam("email") String email) {
-        logger.info("End point getUserDto");
+    @RequestMapping(path = "/getUser", method = RequestMethod.GET)
+    public UserDTO getUser(@RequestParam("email") final String email) {
+        logger.info("End point getUser");
         validateThisUser(email);
         final UserDTO userDTO = userService.findUserDTOByEmail(email);
         if (userDTO == null) {
-            logger.error("Internal server error");
+            logger.error("Not found 404");
             throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"
+                    HttpStatus.NOT_FOUND, "Not found 404"
             );
         }
-        userDTO.setPassword(null);
+//        userDTO.setPassword(null);
         return userDTO;
+    }
+
+    //http://localhost:8080/api/UserWebController/getRoles
+    @Secured({AUTHORITY_PREFIX + ADMIN})
+    @RequestMapping(path = "/getRoles", method = RequestMethod.GET)
+    public List<RoleDTO> getRoles() {
+        logger.info("End point getRoles");
+        return roleService.getAdminRoleDTOS();
     }
 
     //http://localhost:8080/api/UserWebController/registerUser
     @RequestMapping(value = "/registerUser", method = RequestMethod.POST)
-    public Token registerUser(@RequestBody UserDTO userDTOEntry) {
+    public Token registerUser(@RequestBody final UserDTO userDTOEntry) {
         logger.info("End point registerUser");
+        if(
+            userDTOEntry.getEmail()==null || userDTOEntry.getEmail().isEmpty() ||
+                    userDTOEntry.getPassword()==null || userDTOEntry.getPassword().isEmpty() ||
+                    userDTOEntry.getLastName()==null || userDTOEntry.getLastName().isEmpty() ||
+                    userDTOEntry.getFirstName()==null || userDTOEntry.getFirstName().isEmpty()
+        ){
+            logger.error("Not found 404");
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Not found 404"
+            );
+        }
         final Token token = userService.generateUser(userDTOEntry);
         if (token == null) {
             logger.error("Internal server error");
@@ -97,26 +116,17 @@ public class UserWebController extends SuperController {
         return token;
     }
 
-    //http://localhost:8080/api/UserWebController/getRoleDtos?email=jean@jean.com
-    @Secured({AUTHORITY_PREFIX + USER, AUTHORITY_PREFIX + MANAGER, AUTHORITY_PREFIX + ADMIN})
-    @RequestMapping(path = "/getRoleDtos", method = RequestMethod.GET)
-    public List<RoleDTO> getRoleDtos(@RequestParam("email") String email) {
-        logger.info("End point getRoleDtos");
-        validateThisUser(email);
-        return roleService.getRoleDtosList(email);
-    }
-
     //http://localhost:8080/api/UserWebController/setUser
     @Secured({AUTHORITY_PREFIX + USER, AUTHORITY_PREFIX + MANAGER, AUTHORITY_PREFIX + ADMIN})
     @RequestMapping(path = "/setUser", method = RequestMethod.PUT)
-    public UserDTO setUser(@RequestBody UserDTO userDTOEntry) {
+    public UserDTO setUser(@RequestBody final UserDTO userDTOEntry) {
         logger.info("End point setUser");
         validateThisUser(userDTOEntry.getEmail());
         final UserDTO userDTO = userService.setUser(userDTOEntry);
         if (userDTO == null) {
-            logger.error("Internal server error");
+            logger.error("Internal server error 500");
             throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"
+                    HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error 500"
             );
         }
         logger.info("end-point setUser succeed");
@@ -130,24 +140,31 @@ public class UserWebController extends SuperController {
         logger.info("End point getUsers");
         List<UserDTO> userDTOS = userService.getUsers();
         if (userDTOS.isEmpty() || userDTOS == null) {
-            logger.error("Internal server error");
+            logger.error("Internal server error 500");
             throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"
+                    HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error 500"
             );
         }
-        userDTOS.forEach(u -> {
-            u.setPassword(null);
-        });
-        logger.info("end-point getUsers succeed");
+//        userDTOS.forEach(u -> {
+//            u.setPassword(null);
+//        });
         return userDTOS;
     }
 
-    //http://localhost:8080/api/UserWebController/getRoles
-    @Secured({AUTHORITY_PREFIX + ADMIN})
-    @RequestMapping(path = "/getRoles", method = RequestMethod.GET)
-    public List<RoleDTO> getRoles() {
-        logger.info("End point getRoles");
-        return roleService.getAdminRoleDTOS();
+    //http://localhost:8080/api/UserWebController/getUserRoles?email=jean@jean.com
+    @Secured({AUTHORITY_PREFIX + USER, AUTHORITY_PREFIX + MANAGER, AUTHORITY_PREFIX + ADMIN})
+    @RequestMapping(path = "/getUserRoles", method = RequestMethod.GET)
+    public List<RoleDTO> getUserRoles(@RequestParam("email") String email) {
+        logger.info("End point getUserRoles");
+        validateThisUser(email);
+        List<RoleDTO> roleDTOS = roleService.getRoleDtosList(email);
+        if(roleDTOS.isEmpty()){
+            logger.error("Internal server error 500");
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error 500"
+            );
+        }
+        return roleDTOS;
     }
 
     //http://localhost:8080/api/UserWebController/putUserRoles
@@ -157,9 +174,9 @@ public class UserWebController extends SuperController {
         logger.info("End point putUserRoles");
         List<UserDTO> userDTOS = roleService.putUserRoles(email, roleDTOS);
         if (userDTOS.isEmpty()) {
-            logger.error("Internal server error");
+            logger.error("Internal server error 500");
             throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"
+                    HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error 500"
             );
         }
         return userDTOS;
@@ -179,9 +196,9 @@ public class UserWebController extends SuperController {
         logger.info("End point changeUserSatus");
         List<UserDTO> userDTOS = userService.changeUserSatus(userDTO);
         if (userDTOS.isEmpty()) {
-            logger.error("Internal server error");
+            logger.error("Internal server error 500");
             throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"
+                    HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error 500"
             );
         }
         return userDTOS;
@@ -193,9 +210,9 @@ public class UserWebController extends SuperController {
         logger.info("End point refreshToken");
         final Token token = authProvider.getRefreshToken(getEmailUser());
         if (token == null) {
-            logger.error("Internal server error");
+            logger.error("Internal server error 500");
             throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"
+                    HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error 500"
             );
         }
         return token;

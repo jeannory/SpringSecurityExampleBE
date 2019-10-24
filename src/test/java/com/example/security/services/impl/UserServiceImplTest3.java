@@ -19,7 +19,7 @@ import com.example.security.services.IRoleService;
 import com.example.security.services.IUserService;
 import com.example.security.singleton.SingletonBean;
 import com.example.security.tools.ITools;
-import com.example.security.utils.BuilderUtils;
+import com.example.security.utils.BuilderUtils1;
 import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.jwk.RsaJsonWebKey;
 import org.jose4j.jws.JsonWebSignature;
@@ -140,14 +140,14 @@ public class UserServiceImplTest3 implements ITools {
         Mockito.when(spaceRepository.save(Mockito.any(Space.class))).thenReturn(space);
         List<String> rolesString = Collections.singletonList("USER");
         List<JsonWebKey> jsonWebKeys = Arrays.asList(
-                BuilderUtils.buildJsonWebKey(0),
-                BuilderUtils.buildJsonWebKey(1),
-                BuilderUtils.buildJsonWebKey(2)
+                BuilderUtils1.buildJsonWebKey(0),
+                BuilderUtils1.buildJsonWebKey(1),
+                BuilderUtils1.buildJsonWebKey(2)
         );
 
         final SingletonBean singletonBean = Mockito.mock(SingletonBean.class);
         Mockito.when(singletonBean.getJsonWebKeys()).thenReturn(jsonWebKeys);
-        final JsonWebSignature jsonWebSignature = Mockito.spy(BuilderUtils.buildJsonWebSignature("jean@jean.com",
+        final JsonWebSignature jsonWebSignature = Mockito.spy(BuilderUtils1.buildJsonWebSignature("jean@jean.com",
                 rolesString, 0, (RsaJsonWebKey) jsonWebKeys.get(0)));
         final String token2 = jsonWebSignature.getCompactSerialization();
         Mockito.when(jsonWebSignature.getCompactSerialization()).thenThrow(new CustomJoseException("Failed to generate token"));

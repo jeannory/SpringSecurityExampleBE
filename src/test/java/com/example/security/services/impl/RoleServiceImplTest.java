@@ -12,7 +12,7 @@ import com.example.security.repositories.RoleRepository;
 import com.example.security.repositories.UserRepository;
 import com.example.security.services.IRoleService;
 import com.example.security.services.IUserService;
-import com.example.security.utils.BuilderUtils;
+import com.example.security.utils.BuilderUtils1;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -530,10 +530,10 @@ public class RoleServiceImplTest {
     @Test
     public void test_putUserRoles_when_all_parameters_valid() {
         //given
-        final User user = Mockito.spy(BuilderUtils.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
+        final User user = Mockito.spy(BuilderUtils1.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Arrays.asList(Arrays.asList("1","User"), Arrays.asList("2","MANAGER"))));
         Mockito.when(userRepository.findByEmail(Mockito.anyString())).thenReturn(user);
-        Set<Role> roles = BuilderUtils.buildRoles(Arrays.asList(Arrays.asList("1","USER"), Arrays.asList("2","MANAGER"), Arrays.asList("3","ADMIN")));
+        Set<Role> roles = BuilderUtils1.buildRoles(Arrays.asList(Arrays.asList("1","USER"), Arrays.asList("2","MANAGER"), Arrays.asList("3","ADMIN")));
         Mockito.when(superModelMapper.convertToEntities(Mockito.anyList())).thenReturn(new ArrayList(roles));
         user.setRoles(roles);
         Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(user);
@@ -549,9 +549,9 @@ public class RoleServiceImplTest {
         Mockito.when(role3.getId()).thenReturn(3L);
         Mockito.when(roleRepository.findByUsersEmail(Mockito.anyString())).thenReturn(Arrays.asList(role1, role2, role3));
 
-        final UserDTO userDTO1 = BuilderUtils.buildUserDTO(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
+        final UserDTO userDTO1 = BuilderUtils1.buildUserDTO(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", null, "USER, MANAGER, ADMIN", Status.ACTIVE);
-        final UserDTO userDTO2 = BuilderUtils.buildUserDTO(2L, "jeanne@jeanne.com", "1234", Gender.Madame, "jeanne", "jeanne", "0102030405",
+        final UserDTO userDTO2 = BuilderUtils1.buildUserDTO(2L, "jeanne@jeanne.com", "1234", Gender.Madame, "jeanne", "jeanne", "0102030405",
                 "9 rue de la reine", "95000", "Cergy", "rdc", null, "USER, MANAGER", Status.INACTIVE);
         Mockito.when(userService.getUsers()).thenReturn(Arrays.asList(userDTO1, userDTO2));
 
@@ -569,10 +569,10 @@ public class RoleServiceImplTest {
     @Test
     public void test_putUserRoles_when_save_user_failed() {
         //given
-        final User user = Mockito.spy(BuilderUtils.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
+        final User user = Mockito.spy(BuilderUtils1.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Arrays.asList(Arrays.asList("1","User"), Arrays.asList("2","MANAGER"))));
         Mockito.when(userRepository.findByEmail(Mockito.anyString())).thenReturn(user);
-        Set<Role> roles = BuilderUtils.buildRoles(Arrays.asList(Arrays.asList("1","USER"), Arrays.asList("2","MANAGER"), Arrays.asList("3","ADMIN")));
+        Set<Role> roles = BuilderUtils1.buildRoles(Arrays.asList(Arrays.asList("1","USER"), Arrays.asList("2","MANAGER"), Arrays.asList("3","ADMIN")));
         Mockito.when(superModelMapper.convertToEntities(Mockito.anyList())).thenReturn(new ArrayList(roles));
         Mockito.when(userRepository.save(Mockito.any(User.class))).thenThrow(new CustomTransactionalException());
 

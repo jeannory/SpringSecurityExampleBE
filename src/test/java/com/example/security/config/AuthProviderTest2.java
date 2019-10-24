@@ -8,12 +8,11 @@ import com.example.security.exceptions.CustomJoseException;
 import com.example.security.exceptions.CustomTokenException;
 import com.example.security.models.Credential;
 import com.example.security.models.Token;
-import com.example.security.models.TokenUtility;
 import com.example.security.repositories.RoleRepository;
 import com.example.security.repositories.UserRepository;
 import com.example.security.singleton.SingletonBean;
 import com.example.security.tools.ITools;
-import com.example.security.utils.BuilderUtils;
+import com.example.security.utils.BuilderUtils1;
 import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.jwt.NumericDate;
 import org.jose4j.lang.JoseException;
@@ -52,18 +51,18 @@ public class AuthProviderTest2 implements ITools {
         credential.setEmail("jean@jean.com");
         credential.setPassword("1234");
         final String hashPassword = getStringSha3(credential.getPassword());
-        final User user = BuilderUtils.buildUser(1L, "jean@jean.com", hashPassword, Gender.Monsieur, "Jean", "Leroy", "0101010101",
+        final User user = BuilderUtils1.buildUser(1L, "jean@jean.com", hashPassword, Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Collections.singletonList(Arrays.asList("1", "USER")));
         Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);
         List<Role> roles = Arrays.asList(
-                BuilderUtils.buildRole(Arrays.asList("1", "USER")),
-                BuilderUtils.buildRole(Arrays.asList("2", "MANAGER")),
-                BuilderUtils.buildRole(Arrays.asList("3", "ADMIN")));
+                BuilderUtils1.buildRole(Arrays.asList("1", "USER")),
+                BuilderUtils1.buildRole(Arrays.asList("2", "MANAGER")),
+                BuilderUtils1.buildRole(Arrays.asList("3", "ADMIN")));
         Mockito.when(roleRepository.findByUsersEmail(Mockito.anyString())).thenReturn(roles);
         List<JsonWebKey> jsonWebKeys = Arrays.asList(
-                BuilderUtils.buildJsonWebKey(0),
-                BuilderUtils.buildJsonWebKey(1),
-                BuilderUtils.buildJsonWebKey(2)
+                BuilderUtils1.buildJsonWebKey(0),
+                BuilderUtils1.buildJsonWebKey(1),
+                BuilderUtils1.buildJsonWebKey(2)
         );
         Mockito.when(singletonBean.getJsonWebKeys()).thenReturn(jsonWebKeys);
 
@@ -75,7 +74,7 @@ public class AuthProviderTest2 implements ITools {
         /**
          * the token has a new expiration which is always after now
          */
-        final String expiration = BuilderUtils.getStringFromJwtNode(result.getToken(), 1, "exp");
+        final String expiration = BuilderUtils1.getStringFromJwtNode(result.getToken(), 1, "exp");
         final NumericDate jwtNumericDate = NumericDate.fromSeconds(Long.valueOf(expiration));
         final NumericDate numericDateNow = NumericDate.now();
         Assert.assertTrue(jwtNumericDate.isOnOrAfter(numericDateNow));
@@ -88,18 +87,18 @@ public class AuthProviderTest2 implements ITools {
         credential.setEmail("jean@jean.com");
         credential.setPassword("1234");
         final String hashPassword = getStringSha3(credential.getPassword());
-        final User user = BuilderUtils.buildUser(1L, "jean@jean.com", hashPassword, Gender.Monsieur, "Jean", "Leroy", "0101010101",
+        final User user = BuilderUtils1.buildUser(1L, "jean@jean.com", hashPassword, Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Collections.singletonList(Arrays.asList("1", "USER")));
         Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);
         List<Role> roles = Arrays.asList(
-                BuilderUtils.buildRole(Arrays.asList("1", "USER")),
-                BuilderUtils.buildRole(Arrays.asList("2", "MANAGER")),
-                BuilderUtils.buildRole(Arrays.asList("3", "ADMIN")));
+                BuilderUtils1.buildRole(Arrays.asList("1", "USER")),
+                BuilderUtils1.buildRole(Arrays.asList("2", "MANAGER")),
+                BuilderUtils1.buildRole(Arrays.asList("3", "ADMIN")));
         Mockito.when(roleRepository.findByUsersEmail(Mockito.anyString())).thenReturn(roles);
         List<JsonWebKey> jsonWebKeys = Arrays.asList(
-                BuilderUtils.buildJsonWebKey(0),
-                BuilderUtils.buildJsonWebKey(1),
-                BuilderUtils.buildJsonWebKey(2)
+                BuilderUtils1.buildJsonWebKey(0),
+                BuilderUtils1.buildJsonWebKey(1),
+                BuilderUtils1.buildJsonWebKey(2)
         );
         Mockito.when(singletonBean.getJsonWebKeys()).thenReturn(jsonWebKeys);
 
@@ -114,18 +113,18 @@ public class AuthProviderTest2 implements ITools {
         credential.setEmail("jean@jean.com");
         credential.setPassword("1234");
         final String hashPassword = getStringSha3(credential.getPassword());
-        final User user = BuilderUtils.buildUser(1L, "jean@jean.com", hashPassword, Gender.Monsieur, "Jean", "Leroy", "0101010101",
+        final User user = BuilderUtils1.buildUser(1L, "jean@jean.com", hashPassword, Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Collections.singletonList(Arrays.asList("1", "USER")));
         Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);
         List<Role> roles = Arrays.asList(
-                BuilderUtils.buildRole(Arrays.asList("1", "USER")),
-                BuilderUtils.buildRole(Arrays.asList("2", "MANAGER")),
-                BuilderUtils.buildRole(Arrays.asList("3", "ADMIN")));
+                BuilderUtils1.buildRole(Arrays.asList("1", "USER")),
+                BuilderUtils1.buildRole(Arrays.asList("2", "MANAGER")),
+                BuilderUtils1.buildRole(Arrays.asList("3", "ADMIN")));
         Mockito.when(roleRepository.findByUsersEmail(Mockito.anyString())).thenReturn(roles);
         List<JsonWebKey> jsonWebKeys = Arrays.asList(
-                BuilderUtils.buildJsonWebKey(0),
-                BuilderUtils.buildJsonWebKey(1),
-                BuilderUtils.buildJsonWebKey(2)
+                BuilderUtils1.buildJsonWebKey(0),
+                BuilderUtils1.buildJsonWebKey(1),
+                BuilderUtils1.buildJsonWebKey(2)
         );
         Mockito.when(singletonBean.getJsonWebKeys()).thenReturn(jsonWebKeys);
 
@@ -140,7 +139,7 @@ public class AuthProviderTest2 implements ITools {
         credential.setEmail("jean@jean.com");
         credential.setPassword("1234");
         final String hashPassword = getStringSha3(credential.getPassword());
-        final User user = BuilderUtils.buildUser(1L, "jean@jean.com", hashPassword, Gender.Monsieur, "Jean", "Leroy", "0101010101",
+        final User user = BuilderUtils1.buildUser(1L, "jean@jean.com", hashPassword, Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Collections.singletonList(Arrays.asList("1", "USER")));
         Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);
         Mockito.when(roleRepository.findByUsersEmail(Mockito.anyString())).thenReturn(Collections.emptyList());
@@ -156,14 +155,14 @@ public class AuthProviderTest2 implements ITools {
     public void test_getRefreshToken_when_all_parameters_valid() throws JoseException{
         //given
         List<Role> roles = Arrays.asList(
-                BuilderUtils.buildRole(Arrays.asList("1", "USER")),
-                BuilderUtils.buildRole(Arrays.asList("2", "MANAGER")),
-                BuilderUtils.buildRole(Arrays.asList("3", "ADMIN")));
+                BuilderUtils1.buildRole(Arrays.asList("1", "USER")),
+                BuilderUtils1.buildRole(Arrays.asList("2", "MANAGER")),
+                BuilderUtils1.buildRole(Arrays.asList("3", "ADMIN")));
         Mockito.when(roleRepository.findByUsersEmail(Mockito.anyString())).thenReturn(roles);
         List<JsonWebKey> jsonWebKeys = Arrays.asList(
-                BuilderUtils.buildJsonWebKey(0),
-                BuilderUtils.buildJsonWebKey(1),
-                BuilderUtils.buildJsonWebKey(2)
+                BuilderUtils1.buildJsonWebKey(0),
+                BuilderUtils1.buildJsonWebKey(1),
+                BuilderUtils1.buildJsonWebKey(2)
         );
         Mockito.when(singletonBean.getJsonWebKeys()).thenReturn(jsonWebKeys);
 
@@ -175,7 +174,7 @@ public class AuthProviderTest2 implements ITools {
         /**
          * the token has a new expiration which is always after now
          */
-        final String expiration = BuilderUtils.getStringFromJwtNode(result.getToken(), 1, "exp");
+        final String expiration = BuilderUtils1.getStringFromJwtNode(result.getToken(), 1, "exp");
         final NumericDate jwtNumericDate = NumericDate.fromSeconds(Long.valueOf(expiration));
         final NumericDate numericDateNow = NumericDate.now();
         Assert.assertTrue(jwtNumericDate.isOnOrAfter(numericDateNow));
@@ -194,9 +193,9 @@ public class AuthProviderTest2 implements ITools {
     public void test_getRefreshToken_when_roles_is_empty_then_throws_CustomTokenException() throws JoseException{
         //given
         List<Role> roles = Arrays.asList(
-                BuilderUtils.buildRole(Arrays.asList("1", "USER")),
-                BuilderUtils.buildRole(Arrays.asList("2", "MANAGER")),
-                BuilderUtils.buildRole(Arrays.asList("3", "ADMIN")));
+                BuilderUtils1.buildRole(Arrays.asList("1", "USER")),
+                BuilderUtils1.buildRole(Arrays.asList("2", "MANAGER")),
+                BuilderUtils1.buildRole(Arrays.asList("3", "ADMIN")));
         Mockito.when(roleRepository.findByUsersEmail(Mockito.anyString())).thenReturn(Collections.emptyList());
 
         //when
@@ -210,14 +209,14 @@ public class AuthProviderTest2 implements ITools {
     public void test_getRefreshToken_when_throws_CustomJoseException_should_return_null() throws JoseException{
         //given
         List<Role> roles = Arrays.asList(
-                BuilderUtils.buildRole(Arrays.asList("1", "USER")),
-                BuilderUtils.buildRole(Arrays.asList("2", "MANAGER")),
-                BuilderUtils.buildRole(Arrays.asList("3", "ADMIN")));
+                BuilderUtils1.buildRole(Arrays.asList("1", "USER")),
+                BuilderUtils1.buildRole(Arrays.asList("2", "MANAGER")),
+                BuilderUtils1.buildRole(Arrays.asList("3", "ADMIN")));
         Mockito.when(roleRepository.findByUsersEmail(Mockito.anyString())).thenReturn(roles);
         List<JsonWebKey> jsonWebKeys = Arrays.asList(
-                BuilderUtils.buildJsonWebKey(0),
-                BuilderUtils.buildJsonWebKey(1),
-                BuilderUtils.buildJsonWebKey(2)
+                BuilderUtils1.buildJsonWebKey(0),
+                BuilderUtils1.buildJsonWebKey(1),
+                BuilderUtils1.buildJsonWebKey(2)
         );
         Mockito.when(singletonBean.getJsonWebKeys()).thenReturn(jsonWebKeys);
 
