@@ -5,7 +5,6 @@ import com.example.security.entities.User;
 import com.example.security.enums.Gender;
 import com.example.security.enums.Status;
 import com.example.security.exceptions.CustomJoseException;
-import com.example.security.exceptions.CustomTokenException;
 import com.example.security.models.Credential;
 import com.example.security.models.Token;
 import com.example.security.repositories.RoleRepository;
@@ -54,12 +53,12 @@ public class AuthProviderTest2 implements ITools {
         final User user = BuilderUtils1.buildUser(1L, "jean@jean.com", hashPassword, Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Collections.singletonList(Arrays.asList("1", "USER")));
         Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);
-        List<Role> roles = Arrays.asList(
+        final List<Role> roles = Arrays.asList(
                 BuilderUtils1.buildRole(Arrays.asList("1", "USER")),
                 BuilderUtils1.buildRole(Arrays.asList("2", "MANAGER")),
                 BuilderUtils1.buildRole(Arrays.asList("3", "ADMIN")));
         Mockito.when(roleRepository.findByUsersEmail(Mockito.anyString())).thenReturn(roles);
-        List<JsonWebKey> jsonWebKeys = Arrays.asList(
+        final List<JsonWebKey> jsonWebKeys = Arrays.asList(
                 BuilderUtils1.buildJsonWebKey(0),
                 BuilderUtils1.buildJsonWebKey(1),
                 BuilderUtils1.buildJsonWebKey(2)
@@ -71,6 +70,8 @@ public class AuthProviderTest2 implements ITools {
 
         //then
         Assert.assertNotNull("return not null", result.getToken());
+        final String subject = BuilderUtils1.getStringFromJwtNode(result.getToken(), 1, "sub");
+        Assert.assertEquals("jean@jean.com", subject);
         /**
          * the token has a new expiration which is always after now
          */
@@ -81,33 +82,123 @@ public class AuthProviderTest2 implements ITools {
     }
 
     @Test
-    public void test_validateConnection_when_throws_CustomJoseException_should_return_null() throws JoseException {
+    public void test_validateConnection_when_credential_not_matching_should_return_null() throws JoseException {
         //given
-        final Credential credential = Mockito.spy(new Credential());
+        final Credential credential = new Credential();
         credential.setEmail("jean@jean.com");
         credential.setPassword("1234");
         final String hashPassword = getStringSha3(credential.getPassword());
-        final User user = BuilderUtils1.buildUser(1L, "jean@jean.com", hashPassword, Gender.Monsieur, "Jean", "Leroy", "0101010101",
+        final User user = BuilderUtils1.buildUser(1L, "jean@jean.com", "anotherPassword", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Collections.singletonList(Arrays.asList("1", "USER")));
         Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);
-        List<Role> roles = Arrays.asList(
-                BuilderUtils1.buildRole(Arrays.asList("1", "USER")),
-                BuilderUtils1.buildRole(Arrays.asList("2", "MANAGER")),
-                BuilderUtils1.buildRole(Arrays.asList("3", "ADMIN")));
-        Mockito.when(roleRepository.findByUsersEmail(Mockito.anyString())).thenReturn(roles);
-        List<JsonWebKey> jsonWebKeys = Arrays.asList(
-                BuilderUtils1.buildJsonWebKey(0),
-                BuilderUtils1.buildJsonWebKey(1),
-                BuilderUtils1.buildJsonWebKey(2)
-        );
-        Mockito.when(singletonBean.getJsonWebKeys()).thenReturn(jsonWebKeys);
 
-        //when && then
-        Mockito.when(authProvider.validateConnection(credential)).thenThrow(new CustomJoseException("Failed to generate token")).thenReturn(null);
+        //when
+        final Token result = authProvider.validateConnection(credential);
+
+        //then
+        Assert.assertNull("return null", result);
     }
 
     @Test
-    public void test_validateRefreshToken_when_throws_CustomTokenException() throws JoseException {
+    public void test_validateConnection_when_user_not_found_then_throw_CustomTokenException_and_return_null() throws JoseException {
+        //given
+        final Credential credential = new Credential();
+        credential.setEmail("jean@jean.com");
+        credential.setPassword("1234");
+        final User user = null;
+        Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);
+
+        //when
+        final Token result = authProvider.validateConnection(credential);
+
+        //then
+        Assert.assertNull("return null", result);
+    }
+
+    @Test
+    public void test_validateConnection_when_email_is_empty_then_throw_CustomTokenException_and_return_null() throws JoseException {
+        //given
+        final Credential credential = new Credential();
+        credential.setEmail("");
+        credential.setPassword("1234");
+        final User user = null;
+        Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);
+
+        //when
+        final Token result = authProvider.validateConnection(credential);
+
+        //then
+        Assert.assertNull("return null", result);
+    }
+
+    @Test
+    public void test_validateConnection_when_email_is_null_then_throw_CustomTokenException_and_return_null() throws JoseException {
+        //given
+        final Credential credential = new Credential();
+        credential.setEmail(null);
+        credential.setPassword("1234");
+        final User user = null;
+        Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);
+
+        //when
+        final Token result = authProvider.validateConnection(credential);
+
+        //then
+        Assert.assertNull("return null", result);
+    }
+
+    @Test
+    public void test_validateConnection_when_email_is_null_then_throw_CustomTokenException_and_return_null_bis() throws JoseException {
+        //given
+        final Credential credential = new Credential();
+        credential.setPassword("1234");
+        final User user = null;
+        Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);
+
+        //when
+        final Token result = authProvider.validateConnection(credential);
+
+        //then
+        Assert.assertNull("return null", result);
+    }
+
+    @Test
+    public void test_validateConnection_when_email_is_not_valid_email_then_throw_CustomTokenException_and_return_null() throws JoseException {
+        //given
+        final Credential credential = new Credential();
+        credential.setEmail("not an email");
+        credential.setPassword("1234");
+        final User user = null;
+        Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);
+
+        //when
+        final Token result = authProvider.validateConnection(credential);
+
+        //then
+        Assert.assertNull("return null", result);
+    }
+
+    @Test
+    public void test_validateConnection_when_user_Roles_is_empty_then_throw_CustomTokenException_and_return_null() throws JoseException {
+        //given
+        final Credential credential = new Credential();
+        credential.setEmail("jean@jean.com");
+        credential.setPassword("1234");
+        final String hashPassword = getStringSha3(credential.getPassword());
+        final User user = BuilderUtils1.buildUser(1L, "jean@jean.com", hashPassword, Gender.Monsieur, "Jean", "Leroy", "0101010101",
+                "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Collections.singletonList(Arrays.asList("1", "USER")));
+        Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);
+        Mockito.when(roleRepository.findByUsersEmail("jean@jean.com")).thenReturn(Collections.emptyList());
+
+        //when
+        final Token result = authProvider.validateConnection(credential);
+
+        //then
+        Assert.assertNull("return null", result);
+    }
+
+    @Test
+    public void test_validateConnection_when_jsonWebKeys_isEmpty_throw_CustomJoseException_should_return_null() throws JoseException {
         //given
         final Credential credential = Mockito.spy(new Credential());
         credential.setEmail("jean@jean.com");
@@ -121,15 +212,43 @@ public class AuthProviderTest2 implements ITools {
                 BuilderUtils1.buildRole(Arrays.asList("2", "MANAGER")),
                 BuilderUtils1.buildRole(Arrays.asList("3", "ADMIN")));
         Mockito.when(roleRepository.findByUsersEmail(Mockito.anyString())).thenReturn(roles);
-        List<JsonWebKey> jsonWebKeys = Arrays.asList(
+        Mockito.when(singletonBean.getJsonWebKeys()).thenReturn(Collections.emptyList());
+
+        //when
+        final Token result = authProvider.validateConnection(credential);
+
+        //then
+        Assert.assertNull("return null", result);
+    }
+
+    @Test
+    public void test_validateConnection_when_throw_JoseException_and_return_null() throws JoseException{
+        //given
+        final Credential credential = Mockito.spy(new Credential());
+        credential.setEmail("jean@jean.com");
+        credential.setPassword("1234");
+        final String hashPassword = getStringSha3("1234");
+        final User user = BuilderUtils1.buildUser(1L, "jean@jean.com", hashPassword, Gender.Monsieur, "Jean", "Leroy", "0101010101",
+                "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Collections.singletonList(Arrays.asList("1", "USER")));
+        Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);
+        final List<Role> roles = Arrays.asList(
+                BuilderUtils1.buildRole(Arrays.asList("1", "USER")),
+                BuilderUtils1.buildRole(Arrays.asList("2", "MANAGER")),
+                BuilderUtils1.buildRole(Arrays.asList("3", "ADMIN")));
+        Mockito.when(roleRepository.findByUsersEmail(Mockito.anyString())).thenReturn(roles);
+        final List<JsonWebKey> jsonWebKeys = Arrays.asList(
                 BuilderUtils1.buildJsonWebKey(0),
                 BuilderUtils1.buildJsonWebKey(1),
                 BuilderUtils1.buildJsonWebKey(2)
         );
         Mockito.when(singletonBean.getJsonWebKeys()).thenReturn(jsonWebKeys);
+        Mockito.when(authProvider.validateConnection(credential)).thenThrow(new CustomJoseException("CustomJoseException - Failed to generate token"));
 
-        //when && then
-        Mockito.when(authProvider.validateConnection(credential)).thenThrow(new CustomTokenException("all objects must be initialized to build jsonWebSignature")).thenReturn(null);
+        //when
+        final Token result = authProvider.validateConnection(credential);
+
+        //then
+        Assert.assertNull("return null", result);
     }
 
     @Test
@@ -151,6 +270,7 @@ public class AuthProviderTest2 implements ITools {
         Assert.assertNull("return null", result);
     }
 
+    //toDo more tests cases
     @Test
     public void test_getRefreshToken_when_all_parameters_valid() throws JoseException{
         //given
@@ -205,22 +325,4 @@ public class AuthProviderTest2 implements ITools {
         Assert.assertNull("return null", result);
     }
 
-    @Test
-    public void test_getRefreshToken_when_throws_CustomJoseException_should_return_null() throws JoseException{
-        //given
-        List<Role> roles = Arrays.asList(
-                BuilderUtils1.buildRole(Arrays.asList("1", "USER")),
-                BuilderUtils1.buildRole(Arrays.asList("2", "MANAGER")),
-                BuilderUtils1.buildRole(Arrays.asList("3", "ADMIN")));
-        Mockito.when(roleRepository.findByUsersEmail(Mockito.anyString())).thenReturn(roles);
-        List<JsonWebKey> jsonWebKeys = Arrays.asList(
-                BuilderUtils1.buildJsonWebKey(0),
-                BuilderUtils1.buildJsonWebKey(1),
-                BuilderUtils1.buildJsonWebKey(2)
-        );
-        Mockito.when(singletonBean.getJsonWebKeys()).thenReturn(jsonWebKeys);
-
-        //when && then
-        Mockito.when(authProvider.getRefreshToken(Mockito.anyString())).thenThrow(new CustomJoseException("Failed to generate token")).thenReturn(null);;
-    }
 }

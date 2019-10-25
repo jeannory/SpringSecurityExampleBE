@@ -37,51 +37,63 @@ public class AuthProvider implements ITools {
     @Autowired
     SingletonBean singletonBean;
 
+    public Token getRefreshToken(String email) {
+        logger.info("Method getRefreshToken");
+        try {
+            final Token token = new Token();
+            token.setToken(generateJwt(email));
+            logger.info("refreshToken new : " + token.getToken());
+            return token;
+        } catch (CustomJoseException ex) {
+            logger.error(ex.getMessage());
+            return null;
+        } catch (CustomTokenException ex) {
+            logger.error(ex.getMessage());
+            return null;
+        }
+    }
+
     public Token validateConnection(Credential credential) {
         logger.info("Method validateConnection");
-        final User user = userRepository.selectMyUserByEmail(credential.getEmail());
-        if (user == null) {
-            return null;
-        } else if (credential.getSha3Password().equals(user.getPassword())) {
-            try {
-                final String jwt = generateJwt(credential.getEmail());
-                final Token token = new Token();
-                token.setToken(jwt);
-                logger.info("Method validateConnection succeed");
-                return token;
-            } catch (CustomJoseException ex) {
-                logger.error(ex.getMessage());
-                return null;
-            } catch (CustomTokenException ex) {
-                logger.error(ex.getMessage());
-                return null;
+        try {
+            final User user = validateUser(credential.getEmail());
+            if (credential.getSha3Password().equals(user.getPassword())) {
+                try {
+                    final String jwt = generateJwt(credential.getEmail());
+                    final Token token = new Token();
+                    token.setToken(jwt);
+                    return token;
+                } catch (CustomJoseException ex) {
+                    logger.error(ex.getMessage());
+                    return null;
+                }
             }
+        } catch (CustomTokenException ex) {
+            logger.error(ex.getMessage());
+            return null;
         }
         return null;
     }
 
-    public Token getRefreshToken(String email){
-        logger.info("Method getRefreshToken");
-            try {
-                final Token token = new Token();
-                token.setToken(generateJwt(email));
-                logger.info("refreshToken new : " + token.getToken());
-                return token;
-            } catch (CustomJoseException ex) {
-                logger.error(ex.getMessage());
-                return null;
-            } catch (CustomTokenException ex) {
-                logger.error(ex.getMessage());
-                return null;
-            }
+    private User validateUser(String email) {
+        final User user = userRepository.selectMyUserByEmail(email);
+        if (user == null || email.isEmpty() || !isValidEmail(email)) {
+            throw new CustomTokenException("email not valid or user not found");
+        }
+        return user;
+    }
+
+    private boolean isValidEmail(String email) {
+        String regex = "^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$";
+        return email.matches(regex);
     }
 
     private String generateJwt(String email) {
         logger.info("Method generateJwt");
         try {
             List<Role> roles = roleRepository.findByUsersEmail(email);
-            if (roles.isEmpty() || roles == null) {
-                throw new CustomTokenException("email cannot be empty && token must contain at least 1 role");
+            if (roles.isEmpty()) {
+                throw new CustomTokenException("token must contain at least 1 role");
             }
             List<String> rolesString = roles.stream().map(
                     role -> {
@@ -95,9 +107,9 @@ public class AuthProvider implements ITools {
             final JwtClaims jwtClaims = new JwtClaims();
             jwtClaims.setIssuer(DOMAIN);
             /**
-            *UI request for refresh token 30 min before its expiration
-            *setExpirationTimeMinutesInTheFuture to 29 UI will always request for a new token
-            *setExpirationTimeMinutesInTheFuture to 120 UI will request for a new token after 90 min
+             *UI request for refresh token 30 min before its expiration
+             *setExpirationTimeMinutesInTheFuture to 29 UI will always request for a new token
+             *setExpirationTimeMinutesInTheFuture to 120 UI will request for a new token after 90 min
              */
             jwtClaims.setExpirationTimeMinutesInTheFuture(120);
 //            jwtClaims.setExpirationTimeMinutesInTheFuture(29);
@@ -112,11 +124,10 @@ public class AuthProvider implements ITools {
             jsonWebSignature.setKey(rsaJsonWebKey.getPrivateKey());
             jsonWebSignature.setAlgorithmHeaderValue(AlgorithmIdentifiers.RSA_USING_SHA256);
             return jsonWebSignature.getCompactSerialization();
-
         } catch (JoseException ex) {
-            throw new CustomJoseException("Failed to generate token");
-        } catch (NullPointerException ex) {
-            throw new CustomTokenException("all objects must be initialized to build jsonWebSignature");
+            throw new CustomJoseException("CustomJoseException - Failed to generate token");
+        } catch (IndexOutOfBoundsException ex) {
+            throw new CustomJoseException("singletonBean.jsonWebKeys is null or empty");
         }
     }
 

@@ -31,7 +31,6 @@ public class UserDTO extends SuperDTO{
         this.email = email;
     }
 
-    //Don't return the password
     public String getPassword() {
         return password;
     }

@@ -121,7 +121,7 @@ public class UserWebController extends SuperController {
     public UserDTO setUser(@RequestBody final UserDTO userDTOEntry) {
         logger.info("End point setUser");
         validateThisUser(userDTOEntry.getEmail());
-        final UserDTO userDTO = userService.setUser(userDTOEntry);
+        final UserDTO userDTO = userService.modifyUser(userDTOEntry);
         if (userDTO == null) {
             logger.error("Internal server error 500");
             throw new ResponseStatusException(

@@ -41,8 +41,8 @@ public class UserRepositoryTest {
         roles.forEach(role -> {
             roleRepository.save(role);
         });
-        final User user = BuilderUtils1.buildUser("jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
-                "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE);
+        final User user = BuilderUtils1.buildUser("jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy",
+                "0101010101", "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE);
         user.setRoles(roles);
         userRepository.save(user);
 
@@ -57,8 +57,8 @@ public class UserRepositoryTest {
     @Test
     public void test_findByEmail_when_user_no_have_roles_should_return_user() {
         //given
-        final User user = BuilderUtils1.buildUser("jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
-                "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE);
+        final User user = BuilderUtils1.buildUser("jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy",
+                "0101010101", "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE);
         userRepository.save(user);
 
         //when
@@ -70,7 +70,7 @@ public class UserRepositoryTest {
     }
 
     @Test
-    public void test_findByEmail_when__no_user_found_should_return_null() {
+    public void test_findByEmail_when_no_user_found_should_return_null() {
         //given && when
         final User result = userRepository.findByEmail("jean@jean.com");
 
