@@ -122,8 +122,8 @@ public class TokenUtilityProvider implements ITools, Serializable {
             final String decodeHeader = new String(decodeBytesHeader);
             final JsonNode rootNode = singletonBean.getObjectMapper().readValue(decodeHeader, JsonNode.class);
             final JsonNode node = rootNode.path(nodeName);
-            final String kid = node.asText();
-            return kid;
+            final String result = node.asText();
+            return result;
         } catch (IOException ex) {
             throw new CustomJwtException("failed to get infos from the token");
         } catch (NullPointerException ex) {

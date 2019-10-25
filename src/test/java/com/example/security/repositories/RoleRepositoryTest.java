@@ -4,7 +4,7 @@ import com.example.security.entities.Role;
 import com.example.security.entities.User;
 import com.example.security.enums.Gender;
 import com.example.security.enums.Status;
-import com.example.security.utils.BuilderUtils;
+import com.example.security.utils.BuilderUtils1;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -72,7 +72,7 @@ public class RoleRepositoryTest {
         roles.forEach(role -> {
             roleRepository.save(role);
         });
-        final User user = BuilderUtils.buildUser("jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
+        final User user = BuilderUtils1.buildUser("jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE);
         user.setRoles(roles);
         userRepository.save(user);
@@ -87,7 +87,7 @@ public class RoleRepositoryTest {
     @Test
     public void test_findByUsersEmail_when_user_no_have_roles_should_return_emptyList() {
         //given
-        final User user = BuilderUtils.buildUser("jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
+        final User user = BuilderUtils1.buildUser("jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE);
         userRepository.save(user);
 

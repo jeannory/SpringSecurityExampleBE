@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 import static com.example.security.contants.Constants.AUTHORITIES_KEY;
 import static com.example.security.contants.Constants.DOMAIN;
 
-public class BuilderUtils {
+public class BuilderUtils1 {
 
     public static User buildUser(
             String email, String password, Gender gender, String firstName, String lastName, String phoneNumber,
@@ -67,7 +67,7 @@ public class BuilderUtils {
     }
 
 
-    public static HashSet<GrantedAuthority> buildAuthorities(List<String> strings) {
+    public static HashSet<GrantedAuthority> buildAuthorities(final List<String> strings) {
         return strings.stream().map(str -> {
                     return new SimpleGrantedAuthority("ROLE_" + str);
                 }
@@ -75,8 +75,9 @@ public class BuilderUtils {
     }
 
     public static UserDTO buildUserDTO(
-            Long id, String email, String password, Gender gender, String firstName, String lastName, String phoneNumber, String adress,
-            String zip, String city, String deliveryInformation, Long SpaceId, String flattenRoles, Status status) {
+            final Long id, final String email, final String password, final Gender gender, final String firstName,
+            final String lastName, final String phoneNumber, final String adress, final String zip, final String city,
+            final String deliveryInformation, final Long SpaceId, final String flattenRoles, final Status status) {
 
         final UserDTO userDTO = new UserDTO();
         userDTO.setId(id);
@@ -96,7 +97,8 @@ public class BuilderUtils {
         return userDTO;
     }
 
-    public static org.springframework.security.core.userdetails.User buildUserDetails(String userName, String password, Set<GrantedAuthority> authorities) {
+    public static org.springframework.security.core.userdetails.User buildUserDetails(
+            final String userName, final String password, final Set<GrantedAuthority> authorities) {
         org.springframework.security.core.userdetails.User userDetails = Mockito.mock(org.springframework.security.core.userdetails.User.class);
         Mockito.when(userDetails.getUsername()).thenReturn(userName);
         Mockito.when(userDetails.getPassword()).thenReturn(password);
@@ -104,7 +106,7 @@ public class BuilderUtils {
         return userDetails;
     }
 
-    public static Set<Role> buildRoles(List<List<String>> strings) {
+    public static Set<Role> buildRoles(final List<List<String>> strings) {
         return strings.stream().map(str -> {
                     Role role = buildRole(str);
                     return role;
@@ -112,7 +114,7 @@ public class BuilderUtils {
         ).collect(Collectors.toCollection(HashSet::new));
     }
 
-    public static Role buildRole(List<String> strings) {
+    public static Role buildRole(final List<String> strings) {
         final Role role = new Role();
         if(strings.get(0)!=null) {
             role.setId(Long.valueOf(strings.get(0)));
@@ -121,7 +123,7 @@ public class BuilderUtils {
         return role;
     }
 
-    public static RoleDTO buildRoleDTO(List<String> strings) {
+    public static RoleDTO buildRoleDTO(final List<String> strings) {
         final RoleDTO roleDTO= new RoleDTO();
         if(strings.get(0)!=null) {
             roleDTO.setId(Long.valueOf(strings.get(0)));
@@ -130,7 +132,7 @@ public class BuilderUtils {
         return roleDTO;
     }
 
-    public static JsonWebKey buildJsonWebKey(int kid)throws JoseException{
+    public static JsonWebKey buildJsonWebKey(final int kid)throws JoseException{
         final JsonWebKey jsonWebKey = RsaJwkGenerator.generateJwk(2048);
         jsonWebKey.setKeyId(String.valueOf(kid));
         return jsonWebKey;
@@ -138,10 +140,10 @@ public class BuilderUtils {
 
     public static JsonWebSignature buildJsonWebSignature
             (
-            String email,
-            List<String> rolesString,
-            int kid,
-            RsaJsonWebKey rsaJsonWebKey
+                final String email,
+                final List<String> rolesString,
+                final int kid,
+                final RsaJsonWebKey rsaJsonWebKey
             ) throws JoseException {
 
         final JwtClaims jwtClaims = new JwtClaims();
@@ -161,7 +163,7 @@ public class BuilderUtils {
         return jsonWebSignature;
     }
 
-    public static String getStringFromJwtNode(String token, int indice, String nodeName) {
+    public static String getStringFromJwtNode(final String token,final int indice,final String nodeName) {
         try {
             String[] tokenTab = token.split("\\.");
             String headerEncoded = tokenTab[indice];

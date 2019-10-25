@@ -7,7 +7,7 @@ import com.example.security.enums.Gender;
 import com.example.security.enums.Status;
 //import com.example.security.exceptions.CustomConverterException;
 import com.example.security.repositories.UserRepository;
-import com.example.security.utils.BuilderUtils;
+import com.example.security.utils.BuilderUtils1;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,22 +40,22 @@ public class UserServiceImplTestX {
     @Test
     public void test_changeUserSatus_should_return_value_when_all_parameters_valid()  {
         //given
-        final UserDTO userDTO = BuilderUtils.buildUserDTO(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
+        final UserDTO userDTO = BuilderUtils1.buildUserDTO(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", null, "USER, MANAGER, ADMIN", Status.ACTIVE);
 
-        final User user = BuilderUtils.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
+        final User user = BuilderUtils1.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Arrays.asList(Arrays.asList("1","USER"), Arrays.asList("2","COOKER"), Arrays.asList("3","ADMIN")));
         Mockito.when(userRepository.findById(Mockito.eq(userDTO.getId()))).thenReturn(Optional.of(user));
         user.setStatus(Status.INACTIVE);
         List<User> users = Arrays.asList(
                 user,
-                BuilderUtils.buildUser(2L, "jeanne@jeanne.com", "1234", Gender.Monsieur, "Jeanne", "Leroy", "0101010101",
+                BuilderUtils1.buildUser(2L, "jeanne@jeanne.com", "1234", Gender.Monsieur, "Jeanne", "Leroy", "0101010101",
                         "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Arrays.asList(Arrays.asList("1","USER"), Arrays.asList("2","COOKER"), Arrays.asList("3","ADMIN"))));
         Mockito.when(userRepository.findAll()).thenReturn(users);
         userDTO.setStatus(Status.INACTIVE);
         List<UserDTO> userDTOS = Arrays.asList(
                 userDTO,
-                BuilderUtils.buildUserDTO(2L, "jeanne@jeanne.com", "1234", Gender.Monsieur, "Jeanne", "Leroy", "0101010101",
+                BuilderUtils1.buildUserDTO(2L, "jeanne@jeanne.com", "1234", Gender.Monsieur, "Jeanne", "Leroy", "0101010101",
                         "9 rue du roi", "75018", "Paris", "9ème étage", null, "USER, MANAGER, ADMIN", Status.ACTIVE)
         );
         Mockito.when(superModelMapper.convertToDTOs(Mockito.eq(users))).thenReturn(userDTOS);

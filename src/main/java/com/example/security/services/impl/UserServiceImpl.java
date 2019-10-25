@@ -26,6 +26,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -56,11 +57,38 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
     @Autowired
     private UserUserDTOConverter userDTOConverter;
 
-    @Transactional(rollbackFor = CustomTransactionalException.class)
     @Override
-    public boolean getDataTest() {
+    //catch CustomTransactionalException in this method
+    public boolean getDataTest(){
         logger.info("Method getDataTest");
         try {
+            testGetDataTest();
+        }catch (CustomTransactionalException ex){
+            logger.error(ex.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    // Do not catch CustomTransactionalException in this method
+    @Transactional(propagation = Propagation.REQUIRES_NEW,
+            rollbackFor = CustomTransactionalException.class)
+    private void testGetDataTest() throws CustomTransactionalException{
+        validateGetDataTest();
+    }
+
+    // MANDATORY: Transaction must be created before.
+    @Transactional(propagation = Propagation.MANDATORY )
+    private void validateGetDataTest(){
+        try {
+            /**
+            no persistence of userTest when rollback
+             */
+            final User userTest = new User();
+            userTest.setEmail("userTest");
+            userTest.setPassword(getStringSha3("userTest"));
+            userRepository.save(userTest);
+
             final Role userRole = new Role();
             userRole.setName(USER);
             final Role managerRole = new Role();
@@ -72,9 +100,9 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
             roleRepository.save(managerRole);
             roleRepository.save(adminRole);
 
-            Set<Role> userRoles = roleService.getUserRoleSet();
-            Set<Role> managerRoles = roleService.getManagerRoleSet();
-            Set<Role> adminRoles = roleService.getAdminRoleSet();
+            final Set<Role> userRoles = roleService.getUserRoleSet();
+            final Set<Role> managerRoles = roleService.getManagerRoleSet();
+            final Set<Role> adminRoles = roleService.getAdminRoleSet();
 
             final User user1 = new User();
             user1.setEmail("jean@jean.com");
@@ -129,12 +157,9 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
             space4.setName("johny@johny.com space");
             space4.setUser(user4);
             spaceRepository.save(space4);
-
-        } catch (CustomTransactionalException ex) {
-            logger.error(ex.getMessage());
-            return false;
+        }catch(Exception ex){
+            throw new CustomTransactionalException("data tests failed");
         }
-        return true;
     }
 
     /**
@@ -183,7 +208,7 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
             if (user == null) {
                 return null;
             }
-            return (UserDTO) superModelMapper.convertToDTO(user).get();
+            return (UserDTO) userDTOConverter.convertToUserDTO(user).get();
         } catch (NoSuchElementException ex) {
             logger.error(ex.getMessage());
             return null;
@@ -209,6 +234,7 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
         }
 
         try {
+            final String password = userDTOEntry.getPassword();
             userDTOEntry.setPassword(getStringSha3(userDTOEntry.getPassword()));
             final User user = (User) (superModelMapper.convertToEntity(userDTOEntry)).get();
             user.setRoles(roles);
@@ -220,7 +246,7 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
             spaceRepository.save(space);
             final Credential credential = new Credential();
             credential.setEmail(userDTOEntry.getEmail());
-            credential.setPassword(userDTOEntry.getPassword());
+            credential.setPassword(password);
             return authProvider.validateConnection(credential);
 
         } catch (CustomTransactionalException ex) {

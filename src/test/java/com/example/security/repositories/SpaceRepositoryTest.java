@@ -4,7 +4,7 @@ import com.example.security.entities.Space;
 import com.example.security.entities.User;
 import com.example.security.enums.Gender;
 import com.example.security.enums.Status;
-import com.example.security.utils.BuilderUtils;
+import com.example.security.utils.BuilderUtils1;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -32,7 +32,7 @@ public class SpaceRepositoryTest {
     @Test
     public void test_findByUserEmail_when_all_parameters_valid_should_return_result() {
         //given
-        final User user = BuilderUtils.buildUser("jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
+        final User user = BuilderUtils1.buildUser("jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE);
         userRepository.save(user);
         final Space space = new Space();

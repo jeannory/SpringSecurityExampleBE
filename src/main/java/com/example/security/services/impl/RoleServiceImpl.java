@@ -13,10 +13,13 @@ import com.example.security.services.IUserService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.annotation.ApplicationScope;
 
+import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -113,18 +116,36 @@ public class RoleServiceImpl implements IRoleService {
     }
 
     @Override
-    @Transactional(rollbackFor = CustomTransactionalException.class)
-    public List<UserDTO> putUserRoles(String email, List<RoleDTO> roleDTOS){
+    //catch CustomTransactionalException in this method
+    public List<UserDTO> putUserRoles(final String email, final List<RoleDTO> roleDTOS) {
         logger.info("Method putUserRoles");
-        try {
-            final User user = userRepository.findByEmail(email);
-            List<Role> roles = superModelMapper.convertToEntities(roleDTOS);
-            user.setRoles(new HashSet<>(roles));
-            userRepository.save(user);
-        }catch(CustomTransactionalException ex){
-            logger.error(ex.getMessage());
-            return Collections.emptyList();
+            try {
+                testPutUserRolesTransaction(email, roleDTOS);
+                return userService.getUsers();
+            }catch(CustomTransactionalException ex){
+                logger.error(ex.getMessage());
+                return Collections.emptyList();
+            }
         }
-        return userService.getUsers();
+
+        // Do not catch CustomTransactionalException in this method
+        @Transactional(propagation = Propagation.REQUIRES_NEW,
+                rollbackFor = CustomTransactionalException.class)
+        private void testPutUserRolesTransaction(final String email, final List<RoleDTO> roleDTOS) throws CustomTransactionalException{
+            validatePutUserRolesTransaction(email, roleDTOS);
+        }
+
+        // MANDATORY: Transaction must be created before.
+        @Transactional(propagation = Propagation.MANDATORY)
+        private void validatePutUserRolesTransaction(final String email, final List<RoleDTO> roleDTOS){
+            try{
+                final User user = userRepository.findByEmail(email);
+                List<Role> roles = superModelMapper.convertToEntities(roleDTOS);
+                user.setRoles(new HashSet<>(roles));
+                userRepository.save(user);
+            } catch (Exception ex) {
+                throw new CustomTransactionalException("save user failed");
+            }
     }
+
 }

@@ -9,7 +9,7 @@ import com.example.security.enums.Status;
 import com.example.security.exceptions.CustomTransactionalException;
 import com.example.security.repositories.UserRepository;
 import com.example.security.services.IUserService;
-import com.example.security.utils.BuilderUtils;
+import com.example.security.utils.BuilderUtils1;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,10 +39,10 @@ public class UserServiceImplTest4 {
     @Test
     public void test_setUser_when_all_parameters_valid() {
         //given
-        final UserDTO userDTO = Mockito.spy(BuilderUtils.buildUserDTO(1L, "jean@jean.com", "1234", Gender.Madame, "Jeanne", "Leroy", "0101010101",
+        final UserDTO userDTO = Mockito.spy(BuilderUtils1.buildUserDTO(1L, "jean@jean.com", "1234", Gender.Madame, "Jeanne", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", null, "USER, MANAGER, ADMIN", Status.ACTIVE));
 
-        final User user = Mockito.spy(BuilderUtils.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
+        final User user = Mockito.spy(BuilderUtils1.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Arrays.asList(Arrays.asList("1", "User"), Arrays.asList("2", "MANAGER"), Arrays.asList("3", "ADMIN"))));
 
         Mockito.when(userRepository.findByEmail(Mockito.anyString())).thenReturn(user);
@@ -76,7 +76,7 @@ public class UserServiceImplTest4 {
     @Test
     public void test_setUser_when_user_is_null() {
         //given
-        final UserDTO userDTO = Mockito.spy(BuilderUtils.buildUserDTO(1L, "jean@jean.com", "1234", Gender.Madame, "Jeanne", "Leroy", "0101010101",
+        final UserDTO userDTO = Mockito.spy(BuilderUtils1.buildUserDTO(1L, "jean@jean.com", "1234", Gender.Madame, "Jeanne", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", null, "USER, MANAGER, ADMIN", Status.ACTIVE));
 
         final User user = null;
@@ -97,10 +97,10 @@ public class UserServiceImplTest4 {
     @Test
     public void test_setUser_when_save_user_failed() {
         //given
-        final UserDTO userDTO = Mockito.spy(BuilderUtils.buildUserDTO(1L, "jean@jean.com", "1234", Gender.Madame, "Jeanne", "Leroy", "0101010101",
+        final UserDTO userDTO = Mockito.spy(BuilderUtils1.buildUserDTO(1L, "jean@jean.com", "1234", Gender.Madame, "Jeanne", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", null, "USER, MANAGER, ADMIN", Status.ACTIVE));
 
-        final User user = Mockito.spy(BuilderUtils.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
+        final User user = Mockito.spy(BuilderUtils1.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Arrays.asList(Arrays.asList("1", "User"), Arrays.asList("2", "MANAGER"), Arrays.asList("3", "ADMIN"))));
 
         Mockito.when(userRepository.findByEmail(Mockito.anyString())).thenReturn(user);
@@ -124,10 +124,10 @@ public class UserServiceImplTest4 {
     @Test
     public void test_setUser_when_convertToDTO_failed() {
         //given
-        final UserDTO userDTO = Mockito.spy(BuilderUtils.buildUserDTO(1L, "jean@jean.com", "1234", Gender.Madame, "Jeanne", "Leroy", "0101010101",
+        final UserDTO userDTO = Mockito.spy(BuilderUtils1.buildUserDTO(1L, "jean@jean.com", "1234", Gender.Madame, "Jeanne", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", null, "USER, MANAGER, ADMIN", Status.ACTIVE));
 
-        final User user = Mockito.spy(BuilderUtils.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
+        final User user = Mockito.spy(BuilderUtils1.buildUser(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Arrays.asList(Arrays.asList("1", "User"), Arrays.asList("2", "MANAGER"), Arrays.asList("3", "ADMIN"))));
 
         Mockito.when(userRepository.findByEmail(Mockito.anyString())).thenReturn(user);
@@ -152,19 +152,19 @@ public class UserServiceImplTest4 {
     @Test
     public void test_getUsers_when_all_parameters_valid() {
         //given
-        final User user1 = Mockito.spy(BuilderUtils.buildUser(null, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
+        final User user1 = Mockito.spy(BuilderUtils1.buildUser(null, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75015", "Paris", "9ème étage", Status.ACTIVE, Arrays.asList(Arrays.asList("1", "USER"), Arrays.asList("2", "COOKER"), Arrays.asList("3", "ADMIN"))));
-        final User user2 = Mockito.spy(BuilderUtils.buildUser(null, "jeanne@jean.com", "4567", Gender.Madame, "Jeanne", "Leroy", "0909090909",
+        final User user2 = Mockito.spy(BuilderUtils1.buildUser(null, "jeanne@jean.com", "4567", Gender.Madame, "Jeanne", "Leroy", "0909090909",
                 "9 rue du roi", "75015", "Paris", "9ème étage", Status.ACTIVE, Arrays.asList(Arrays.asList("1", "USER"), Arrays.asList("2", "COOKER"), Arrays.asList("3", "ADMIN"))));
-        final User user3 = Mockito.spy(BuilderUtils.buildUser(null, "franck@franck.com", "0000", Gender.Monsieur, "franck", "francky", "0102030405",
+        final User user3 = Mockito.spy(BuilderUtils1.buildUser(null, "franck@franck.com", "0000", Gender.Monsieur, "franck", "francky", "0102030405",
                 "9 rue du fou", "75018", "Paris", "RDC", Status.ACTIVE, Collections.singletonList(Arrays.asList("1", "USER"))));
         final List<User> users = new ArrayList<>(Arrays.asList(user1, user2, user3));
         Mockito.when(userRepository.findAll()).thenReturn(users);
-        final UserDTO userDTO1 = BuilderUtils.buildUserDTO(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
+        final UserDTO userDTO1 = BuilderUtils1.buildUserDTO(1L, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75015", "Paris", "9ème étage", null, "ADMIN, COOKER, USER", Status.ACTIVE);
-        final UserDTO userDTO2 = BuilderUtils.buildUserDTO(2L, "jeanne@jean.com", "4567", Gender.Madame, "Jean", "Leroy", "0909090909",
+        final UserDTO userDTO2 = BuilderUtils1.buildUserDTO(2L, "jeanne@jean.com", "4567", Gender.Madame, "Jean", "Leroy", "0909090909",
                 "9 rue du roi", "75015", "Paris", "9ème étage", null, "ADMIN, COOKER, USER", Status.ACTIVE);
-        final UserDTO userDTO3 = BuilderUtils.buildUserDTO(3L, "franck@franck.com", "0000", Gender.Monsieur, "franck", "francky", "0102030405",
+        final UserDTO userDTO3 = BuilderUtils1.buildUserDTO(3L, "franck@franck.com", "0000", Gender.Monsieur, "franck", "francky", "0102030405",
                 "9 rue du fou", "75018", "Paris", "RDC", null, "USER", Status.ACTIVE);
         final List<UserDTO> userDTOS = new ArrayList(Arrays.asList(userDTO1, userDTO2, userDTO3));
         Mockito.when(userDTOConverter.convertToUserDTOs(Mockito.anyList())).thenReturn(userDTOS);
@@ -209,11 +209,11 @@ public class UserServiceImplTest4 {
     @Test
     public void test_getUsers_when_convertToUserDTOs_return_emptyList() {
         //given
-        final User user1 = Mockito.spy(BuilderUtils.buildUser(null, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
+        final User user1 = Mockito.spy(BuilderUtils1.buildUser(null, "jean@jean.com", "1234", Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75015", "Paris", "9ème étage", Status.ACTIVE, Arrays.asList(Arrays.asList("1", "USER"), Arrays.asList("2", "COOKER"), Arrays.asList("3", "ADMIN"))));
-        final User user2 = Mockito.spy(BuilderUtils.buildUser(null, "jeanne@jean.com", "4567", Gender.Madame, "Jeanne", "Leroy", "0909090909",
+        final User user2 = Mockito.spy(BuilderUtils1.buildUser(null, "jeanne@jean.com", "4567", Gender.Madame, "Jeanne", "Leroy", "0909090909",
                 "9 rue du roi", "75015", "Paris", "9ème étage", Status.ACTIVE, Arrays.asList(Arrays.asList("1", "USER"), Arrays.asList("2", "COOKER"), Arrays.asList("3", "ADMIN"))));
-        final User user3 = Mockito.spy(BuilderUtils.buildUser(null, "franck@franck.com", "0000", Gender.Monsieur, "franck", "francky", "0102030405",
+        final User user3 = Mockito.spy(BuilderUtils1.buildUser(null, "franck@franck.com", "0000", Gender.Monsieur, "franck", "francky", "0102030405",
                 "9 rue du fou", "75018", "Paris", "RDC", Status.ACTIVE, Collections.singletonList(Arrays.asList("1", "USER"))));
         final List<User> users = new ArrayList<>(Arrays.asList(user1, user2, user3));
         Mockito.when(userRepository.findAll()).thenReturn(users);
