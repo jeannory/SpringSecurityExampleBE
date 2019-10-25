@@ -215,25 +215,42 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
         }
     }
 
-
-    @Transactional(rollbackFor = CustomTransactionalException.class)
+    //catch CustomTransactionalException in this method
     @Override
     public Token generateUser(UserDTO userDTOEntry) {
         logger.info("Method generateUser");
-        Set<Role> roles = roleService.getUserRoleSet();
-        if (
-                userDTOEntry == null ||
-                        userDTOEntry.getEmail() == null ||
-                        userDTOEntry.getPassword() == null ||
-                        userDTOEntry.getFirstName() == null ||
-                        userDTOEntry.getLastName() == null ||
-                        roles == null ||
-                        roles.isEmpty()
-        ) {
+        try {
+            return testGenerateUser(userDTOEntry);
+        } catch (CustomTransactionalException ex) {
+            logger.error(ex.getMessage());
             return null;
         }
+    }
 
+    // Do not catch CustomTransactionalException in this method
+    @Transactional(propagation = Propagation.REQUIRES_NEW,
+    rollbackFor = CustomTransactionalException.class)
+    private Token testGenerateUser(final UserDTO userDTOEntry) throws CustomTransactionalException{
+        logger.info("Method testGenerateUser");
+            return validateGenerateUser(userDTOEntry);
+    }
+
+    // MANDATORY: Transaction must be created before.
+    @Transactional(propagation = Propagation.MANDATORY)
+    private Token validateGenerateUser(UserDTO userDTOEntry){
+        logger.info("Method validateGenerateUser");
         try {
+            Set<Role> roles = roleService.getUserRoleSet();
+            if (
+                    userDTOEntry == null ||
+                            userDTOEntry.getEmail() == null ||
+                            userDTOEntry.getPassword() == null ||
+                            userDTOEntry.getFirstName() == null ||
+                            userDTOEntry.getLastName() == null ||
+                            roles == null || roles.isEmpty()
+            ) {
+                throw new CustomTransactionalException();
+            }
             final String password = userDTOEntry.getPassword();
             userDTOEntry.setPassword(getStringSha3(userDTOEntry.getPassword()));
             final User user = (User) (superModelMapper.convertToEntity(userDTOEntry)).get();
@@ -248,12 +265,9 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
             credential.setEmail(userDTOEntry.getEmail());
             credential.setPassword(password);
             return authProvider.validateConnection(credential);
-
-        } catch (CustomTransactionalException ex) {
-            logger.error(ex.getMessage());
-            return null;
+        }catch(Exception ex){
+            throw new CustomTransactionalException("persistence failed");
         }
-
     }
 
     @Override

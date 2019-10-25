@@ -2,9 +2,11 @@ package com.example.security.controllers;
 
 import com.example.security.dtos.RoleDTO;
 import com.example.security.dtos.UserDTO;
+import com.example.security.entities.User;
 import com.example.security.enums.Gender;
 import com.example.security.models.Credential;
 import com.example.security.models.Token;
+import com.example.security.repositories.UserRepository;
 import com.example.security.tools.ITools;
 import com.example.security.utils.BuilderUtils1;
 import com.example.security.utils.BuilderUtils2;
@@ -13,10 +15,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -49,10 +51,40 @@ public class UserWebControllerTest2 implements ITools {
     private MockMvc mockMvc;
     @Autowired
     private BuilderUtils2 builderUtils2;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Before
     public void setUp() throws Exception {
-        builderUtils2.dataTestBuilder();
+        final String sha3Password = getStringSha3("0000");
+        jdbcTemplate.execute(
+                "delete from cuisine_users_roles; ");
+        jdbcTemplate.execute(
+                "delete from cuisine_role; ");
+        jdbcTemplate.execute(
+                "delete from cuisine_space; ");
+        jdbcTemplate.execute(
+                "delete from cuisine_user; ");
+        jdbcTemplate.execute(
+                "insert into cuisine_role(id, name) values (1001, 'USER'); " +
+                        "insert into cuisine_role(id, name) values (1002, 'MANAGER'); " +
+                        "insert into cuisine_role(id, name) values (1003, 'ADMIN'); "
+        );
+        jdbcTemplate.execute(
+                "insert into cuisine_user(id, email, password) values (1001, 'jean@jean.com', '" + sha3Password + "'); " +
+                        "insert into cuisine_user(id, email, password) values (1002, 'johny@johny.com', '" + sha3Password + "'); " +
+                        "insert into cuisine_user(id, email, password) values (1003, 'jeanne@jeanne.com', '" + sha3Password + "'); "
+        );
+        jdbcTemplate.execute(
+                "insert into cuisine_users_roles(cuisine_user_id, cuisine_role_id) values (1001,1001); " +
+                        "insert into cuisine_users_roles(cuisine_user_id, cuisine_role_id) values (1001,1002); " +
+                        "insert into cuisine_users_roles(cuisine_user_id, cuisine_role_id) values (1001,1003); " +
+                        "insert into cuisine_users_roles(cuisine_user_id, cuisine_role_id) values (1002,1001); " +
+                        "insert into cuisine_users_roles(cuisine_user_id, cuisine_role_id) values (1002,1002); " +
+                        "insert into cuisine_users_roles(cuisine_user_id, cuisine_role_id) values (1003,1001); "
+        );
     }
 
     /**
@@ -237,7 +269,7 @@ public class UserWebControllerTest2 implements ITools {
     public void test_registerUser_when_parameters_valid_should_return_token() throws Exception {
         //given
         final UserDTO userDTO = new UserDTO();
-        userDTO.setEmail("john@john.com");
+        userDTO.setEmail("john11@john.com");
         userDTO.setPassword("0000");
         userDTO.setFirstName("john");
         userDTO.setLastName("john");
@@ -248,8 +280,12 @@ public class UserWebControllerTest2 implements ITools {
                 .andReturn();
         final Token result = builderUtils2.fromJsonResult(mvcResult, Token.class);
         Assert.assertTrue(!result.getToken().isEmpty());
+        //decode token
         final String sub = BuilderUtils1.getStringFromJwtNode(result.getToken(), 1, "sub");
-        Assert.assertEquals("john@john.com", sub);
+        Assert.assertEquals("john11@john.com", sub);
+        //user found on db
+        User user = userRepository.findByEmail("john11@john.com");
+        Assert.assertEquals("john11@john.com", user.getEmail());
     }
 
     @Test
@@ -257,34 +293,47 @@ public class UserWebControllerTest2 implements ITools {
         //given
         final UserDTO userDTO = new UserDTO();
         userDTO.setPassword("0000");
-        userDTO.setFirstName("john");
-        userDTO.setLastName("john");
+        userDTO.setFirstName("firstName never persisted");
+        userDTO.setLastName("lastName never persisted");
         userDTO.setGender(Gender.Monsieur);
         //when && then
         final MvcResult mvcResult = invokeRegisterUser(userDTO)
                 .andExpect(status().isNotFound())
                 .andReturn();
+        //user not found on db (transactional works)
+        List<User> users = userRepository.findAll();
+        users.forEach(user->{
+            if(user.getFirstName()!=null){
+                Assert.assertTrue(!user.getFirstName().equals("firstName never persisted"));
+            }
+            if(user.getLastName()!=null){
+                Assert.assertTrue(!user.getLastName().equals("lastName never persisted"));
+            }
+        });
     }
 
     @Test
     public void test_registerUser_when_password_is_missing_should_return_status_404() throws Exception {
         //given
         final UserDTO userDTO = new UserDTO();
-        userDTO.setEmail("john@john.com");
+        userDTO.setEmail("john11@john.com");
         userDTO.setFirstName("john");
         userDTO.setLastName("john");
         userDTO.setGender(Gender.Monsieur);
-//        //when && then
+        //when && then
         final MvcResult mvcResult = invokeRegisterUser(userDTO)
                 .andExpect(status().isNotFound())
                 .andReturn();
+        //user not found on db (transactional works)
+        User user = userRepository.findByEmail("john11@john.com");
+        Assert.assertNull("return null", user);
     }
 
     @Test
     public void test_registerUser_when_firstName_is_missing_should_return_status_404() throws Exception {
         //given
         final UserDTO userDTO = new UserDTO();
-        userDTO.setEmail("john@john.com");
+        userDTO.setEmail("john11@john.com");
         userDTO.setPassword("0000");
         userDTO.setLastName("john");
         userDTO.setGender(Gender.Monsieur);
@@ -292,13 +341,16 @@ public class UserWebControllerTest2 implements ITools {
         final MvcResult mvcResult = invokeRegisterUser(userDTO)
                 .andExpect(status().isNotFound())
                 .andReturn();
+        //user not found on db (transactional works)
+        User user = userRepository.findByEmail("john11@john.com");
+        Assert.assertNull("return null", user);
     }
 
     @Test
     public void test_registerUser_when_lastName_is_missing_should_return_status_404() throws Exception {
         //given
         final UserDTO userDTO = new UserDTO();
-        userDTO.setEmail("john@john.com");
+        userDTO.setEmail("john11@john.com");
         userDTO.setPassword("0000");
         userDTO.setFirstName("john");
         userDTO.setGender(Gender.Monsieur);
@@ -306,6 +358,9 @@ public class UserWebControllerTest2 implements ITools {
         final MvcResult mvcResult = invokeRegisterUser(userDTO)
                 .andExpect(status().isNotFound())
                 .andReturn();
+        //user not found on db (transactional works)
+        User user = userRepository.findByEmail("john11@john.com");
+        Assert.assertNull("return null", user);
     }
 
     //toDo to reorganize && unit test cases toDo
