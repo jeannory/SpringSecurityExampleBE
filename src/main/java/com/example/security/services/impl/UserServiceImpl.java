@@ -3,7 +3,6 @@ package com.example.security.services.impl;
 import com.example.security.config.AuthProvider;
 import com.example.security.config.TokenUtilityProvider;
 import com.example.security.converter.SuperModelMapper;
-import com.example.security.converter.UserUserDTOConverter;
 import com.example.security.dtos.UserDTO;
 import com.example.security.entities.Role;
 import com.example.security.entities.Space;
@@ -28,12 +27,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.example.security.contants.Constants.*;
-
 import static com.example.security.contants.Constants.AUTHORITY_PREFIX;
 
 @Service(value = "userService")
@@ -54,8 +51,6 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
     private SpaceRepository spaceRepository;
     @Autowired
     private IRoleService roleService;
-    @Autowired
-    private UserUserDTOConverter userDTOConverter;
 
     @Override
     //catch CustomTransactionalException in this method
@@ -208,7 +203,7 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
             if (user == null) {
                 return null;
             }
-            return (UserDTO) userDTOConverter.convertToUserDTO(user).get();
+            return (UserDTO) superModelMapper.convertToDTO(user).get();
         } catch (NoSuchElementException ex) {
             logger.error(ex.getMessage());
             return null;
@@ -237,23 +232,21 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
 
     // MANDATORY: Transaction must be created before.
     @Transactional(propagation = Propagation.MANDATORY)
-    private Token validateGenerateUser(UserDTO userDTOEntry){
+    private Token validateGenerateUser(UserDTO userDTO){
         logger.info("Method validateGenerateUser");
         try {
             Set<Role> roles = roleService.getUserRoleSet();
             if (
-                    userDTOEntry == null ||
-                            userDTOEntry.getEmail() == null ||
-                            userDTOEntry.getPassword() == null ||
-                            userDTOEntry.getFirstName() == null ||
-                            userDTOEntry.getLastName() == null ||
+                    userDTO == null ||
+                            userDTO.getEmail() == null ||
+                            userDTO.getPassword() == null ||
+                            userDTO.getFirstName() == null ||
+                            userDTO.getLastName() == null ||
                             roles == null || roles.isEmpty()
             ) {
                 throw new CustomTransactionalException();
             }
-            final String password = userDTOEntry.getPassword();
-            userDTOEntry.setPassword(getStringSha3(userDTOEntry.getPassword()));
-            final User user = (User) (superModelMapper.convertToEntity(userDTOEntry)).get();
+            final User user = (User) (superModelMapper.convertToEntity(userDTO)).get();
             user.setRoles(roles);
             user.setStatus(Status.ACTIVE);
             userRepository.save(user);
@@ -262,8 +255,8 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
             space.setUser(user);
             spaceRepository.save(space);
             final Credential credential = new Credential();
-            credential.setEmail(userDTOEntry.getEmail());
-            credential.setPassword(password);
+            credential.setEmail(userDTO.getEmail());
+            credential.setPassword(userDTO.getPassword());
             return authProvider.validateConnection(credential);
         }catch(Exception ex){
             throw new CustomTransactionalException("persistence failed");
@@ -309,7 +302,7 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
             if (users.isEmpty()) {
                 return Collections.emptyList();
             }
-            return userDTOConverter.convertToUserDTOs(users);
+            return superModelMapper.convertToDTOs(users);
         }catch(NullPointerException ex){
             logger.error(ex.getMessage());
             return Collections.emptyList();

@@ -50,7 +50,7 @@ public class AuthProviderTest2 implements ITools {
         final Credential credential = Mockito.spy(new Credential());
         credential.setEmail("jean@jean.com");
         credential.setPassword("1234");
-        final String hashPassword = getStringSha3(credential.getPassword());
+        final String hashPassword = getStringSha3("1234");
         final User user = BuilderUtils1.buildUser(1L, "jean@jean.com", hashPassword, Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Collections.singletonList(Arrays.asList("1", "USER")));
         Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);

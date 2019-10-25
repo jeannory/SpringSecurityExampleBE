@@ -79,7 +79,6 @@ public class UserWebController extends SuperController {
                     HttpStatus.NOT_FOUND, "Not found 404"
             );
         }
-//        userDTO.setPassword(null);
         return userDTO;
     }
 
@@ -145,9 +144,6 @@ public class UserWebController extends SuperController {
                     HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error 500"
             );
         }
-//        userDTOS.forEach(u -> {
-//            u.setPassword(null);
-//        });
         return userDTOS;
     }
 

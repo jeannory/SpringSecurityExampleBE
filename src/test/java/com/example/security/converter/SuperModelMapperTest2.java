@@ -18,16 +18,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class UserUserDTOConverterTest {
+public class SuperModelMapperTest2 {
 
-    private UserUserDTOConverter userDTOConverter;
     private SingletonBean singletonBean;
+    private SuperModelMapper superModelMapper;
 
     @Before
     public void setUp() throws Exception {
-        this.userDTOConverter = Mockito.spy(new UserUserDTOConverter());
+        this.superModelMapper = Mockito.spy(new SuperModelMapper());
         singletonBean = Mockito.mock(SingletonBean.class);
-        Whitebox.setInternalState(userDTOConverter, "singletonBean", singletonBean);
+        Whitebox.setInternalState(superModelMapper, "singletonBean", singletonBean);
     }
 
     @Test
@@ -38,7 +38,7 @@ public class UserUserDTOConverterTest {
         Mockito.when(singletonBean.getModelMapper()).thenReturn(new ModelMapper());
 
         //then
-        final Optional<UserDTO> result = userDTOConverter.convertToUserDTO(user);
+        final Optional<UserDTO> result = superModelMapper.convertToDTO(user);
 
         //then
         Assert.assertEquals("jean@jean.com", result.get().getEmail());
@@ -52,7 +52,7 @@ public class UserUserDTOConverterTest {
         Mockito.when(singletonBean.getModelMapper()).thenReturn(new ModelMapper());
 
         //then
-        final Optional<UserDTO> result = userDTOConverter.convertToUserDTO(user);
+        final Optional<UserDTO> result = superModelMapper.convertToDTO(user);
 
         //then
         Assert.assertEquals(Optional.empty(), result);
@@ -66,7 +66,7 @@ public class UserUserDTOConverterTest {
         Mockito.when(singletonBean.getModelMapper()).thenReturn(new ModelMapper());
 
         //then
-        final Optional<UserDTO> result = userDTOConverter.convertToUserDTO(user);
+        final Optional<UserDTO> result = superModelMapper.convertToDTO(user);
 
         //then
         Assert.assertEquals(Optional.empty(), result);
@@ -83,7 +83,7 @@ public class UserUserDTOConverterTest {
         Mockito.when(singletonBean.getModelMapper()).thenReturn(new ModelMapper());
 
         //then
-        final List<UserDTO> results = userDTOConverter.convertToUserDTOs(users);
+        final List<UserDTO> results = superModelMapper.convertToDTOs(users);
 
         //then
         Assert.assertEquals(2, results.size());
@@ -103,7 +103,7 @@ public class UserUserDTOConverterTest {
         Mockito.when(singletonBean.getModelMapper()).thenReturn(new ModelMapper());
 
         //then
-        final List<UserDTO> results = userDTOConverter.convertToUserDTOs(users);
+        final List<UserDTO> results = superModelMapper.convertToDTOs(users);
 
         //then
         Assert.assertEquals(1, results.size());
@@ -119,10 +119,10 @@ public class UserUserDTOConverterTest {
         final User user2 = null;
         final List<User> users = Arrays.asList(user1, user2);
         Mockito.when(singletonBean.getModelMapper()).thenReturn(new ModelMapper());
-        Mockito.when(userDTOConverter.convertToUserDTO(Mockito.any(User.class))).thenReturn(Optional.empty());
+        Mockito.when(superModelMapper.convertToDTO(Mockito.any(User.class))).thenReturn(Optional.empty());
 
         //then
-        final List<UserDTO> results = userDTOConverter.convertToUserDTOs(users);
+        final List<UserDTO> results = superModelMapper.convertToDTOs(users);
 
         //then
         Assert.assertEquals(Collections.emptyList(), results);
