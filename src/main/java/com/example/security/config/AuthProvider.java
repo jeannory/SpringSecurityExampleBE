@@ -39,11 +39,10 @@ public class AuthProvider implements ITools {
 
     public Token validateConnection(Credential credential) {
         logger.info("Method validateConnection");
-        final String credentialSha3 = getStringSha3(credential.getPassword());
         final User user = userRepository.selectMyUserByEmail(credential.getEmail());
         if (user == null) {
             return null;
-        } else if (credentialSha3.equals(user.getPassword())) {
+        } else if (credential.getSha3Password().equals(user.getPassword())) {
             try {
                 final String jwt = generateJwt(credential.getEmail());
                 final Token token = new Token();

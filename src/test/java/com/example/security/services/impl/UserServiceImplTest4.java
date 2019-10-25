@@ -1,7 +1,6 @@
 package com.example.security.services.impl;
 
 import com.example.security.converter.SuperModelMapper;
-import com.example.security.converter.UserUserDTOConverter;
 import com.example.security.dtos.UserDTO;
 import com.example.security.entities.User;
 import com.example.security.enums.Gender;
@@ -23,17 +22,14 @@ public class UserServiceImplTest4 {
     private IUserService userService;
     private UserRepository userRepository;
     private SuperModelMapper superModelMapper;
-    private UserUserDTOConverter userDTOConverter;
 
     @Before
     public void setUp() throws Exception {
         this.userService = new UserServiceImpl();
         userRepository = Mockito.mock(UserRepository.class);
         superModelMapper = Mockito.mock(SuperModelMapper.class);
-        userDTOConverter = Mockito.mock(UserUserDTOConverter.class);
         Whitebox.setInternalState(userService, "userRepository", userRepository);
         Whitebox.setInternalState(userService, "superModelMapper", superModelMapper);
-        Whitebox.setInternalState(userService, "userDTOConverter", userDTOConverter);
     }
 
     @Test
@@ -167,7 +163,7 @@ public class UserServiceImplTest4 {
         final UserDTO userDTO3 = BuilderUtils1.buildUserDTO(3L, "franck@franck.com", "0000", Gender.Monsieur, "franck", "francky", "0102030405",
                 "9 rue du fou", "75018", "Paris", "RDC", null, "USER", Status.ACTIVE);
         final List<UserDTO> userDTOS = new ArrayList(Arrays.asList(userDTO1, userDTO2, userDTO3));
-        Mockito.when(userDTOConverter.convertToUserDTOs(Mockito.anyList())).thenReturn(userDTOS);
+        Mockito.when(superModelMapper.convertToDTOs(Mockito.anyList())).thenReturn(userDTOS);
 
         //when
         final List<UserDTO> results = userService.getUsers();
@@ -217,7 +213,7 @@ public class UserServiceImplTest4 {
                 "9 rue du fou", "75018", "Paris", "RDC", Status.ACTIVE, Collections.singletonList(Arrays.asList("1", "USER"))));
         final List<User> users = new ArrayList<>(Arrays.asList(user1, user2, user3));
         Mockito.when(userRepository.findAll()).thenReturn(users);
-        Mockito.when(userDTOConverter.convertToUserDTOs(Mockito.anyList())).thenReturn(Collections.emptyList());
+        Mockito.when(superModelMapper.convertToDTOs(Mockito.anyList())).thenReturn(Collections.emptyList());
 
         //when
         final List<UserDTO> results = userService.getUsers();

@@ -1,6 +1,8 @@
 package com.example.security.models;
 
-public class Credential {
+import com.example.security.tools.ITools;
+
+public class Credential implements ITools {
 
     private String email;
     private String password;
@@ -24,5 +26,8 @@ public class Credential {
         this.password = password;
     }
 
+    public String getSha3Password(){
+        return getStringSha3(password);
+    }
 
 }

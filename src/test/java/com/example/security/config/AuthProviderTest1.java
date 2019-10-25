@@ -52,7 +52,7 @@ public class AuthProviderTest1 {
         Credential credential = new Credential();
         credential.setEmail("jean@jean.com");
         credential.setPassword("1234");
-        String hashPassword = iTools.getStringSha3(credential.getPassword());
+        String hashPassword = iTools.getStringSha3("1234");
         final User user = BuilderUtils1.buildUser(1L, "jean@jean.com", hashPassword, Gender.Monsieur, "Jean", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Collections.singletonList(Arrays.asList("1", "USER")));
         Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);

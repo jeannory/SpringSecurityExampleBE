@@ -14,7 +14,7 @@ import org.modelmapper.ModelMapper;
 
 import java.util.*;
 
-public class SuperModelMapperTest {
+public class SuperModelMapperTest1 {
 
     private SuperModelMapper superModelMapper;
     private SingletonBean singletonBean;
