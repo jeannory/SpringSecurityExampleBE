@@ -296,6 +296,7 @@ public class UserWebControllerTest2 implements ITools {
         userDTO.setFirstName("firstName never persisted");
         userDTO.setLastName("lastName never persisted");
         userDTO.setGender(Gender.Monsieur);
+
         //when && then
         final MvcResult mvcResult = invokeRegisterUser(userDTO)
                 .andExpect(status().isNotFound())

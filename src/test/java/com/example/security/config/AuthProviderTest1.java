@@ -28,16 +28,12 @@ public class AuthProviderTest1 {
 
     @InjectMocks
     private AuthProvider authProvider;
-
     @Autowired
     private ITools iTools = new AuthProvider();
-
     @Mock
     private UserRepository userRepository;
-
     @Mock
     private RoleRepository roleRepository;
-
     @Mock
     private SingletonBean singletonBean;
 
@@ -110,103 +106,6 @@ public class AuthProviderTest1 {
             Assert.assertEquals(expiration2, expiration1);
             System.out.println("test_validateConnection kid and exp are equals !!!!!!");
         }
-
-    }
-
-    @Test
-    public void test_validateConnection_when_all_credential_not_matching_should_return_null() throws JoseException {
-        //given
-        Credential credential = new Credential();
-        credential.setEmail("jean@jean.com");
-        credential.setPassword("1234");
-        String hashPassword = iTools.getStringSha3(credential.getPassword());
-        final User user = BuilderUtils1.buildUser(1L, "jean@jean.com", "anotherPassword", Gender.Monsieur, "Jean", "Leroy", "0101010101",
-                "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Collections.singletonList(Arrays.asList("1", "USER")));
-        Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);
-
-        //when
-        final Token result = authProvider.validateConnection(credential);
-
-        //then
-        Assert.assertNull("return null", result);
-    }
-
-    @Test
-    public void test_validateConnection_when_when_user_not_found_should_return_null() throws JoseException {
-        //given
-        Credential credential = new Credential();
-        credential.setEmail("jean@jean.com");
-        credential.setPassword("1234");
-        final User user = null;
-        Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);
-
-        //when
-        final Token result = authProvider.validateConnection(credential);
-
-        //then
-        Assert.assertNull("return null", result);
-    }
-
-    @Test
-    public void test_validateConnection_when_user_Roles_is_empty_return_null() throws JoseException {
-        //given
-        Credential credential = new Credential();
-        credential.setEmail("jean@jean.com");
-        credential.setPassword("1234");
-        String hashPassword = iTools.getStringSha3(credential.getPassword());
-        final User user = BuilderUtils1.buildUser(1L, "jean@jean.com", hashPassword, Gender.Monsieur, "Jean", "Leroy", "0101010101",
-                "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Collections.singletonList(Arrays.asList("1", "USER")));
-        Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);
-        Mockito.when(roleRepository.findByUsersEmail("jean@jean.com")).thenReturn(Collections.emptyList());
-
-        //when
-        final Token result = authProvider.validateConnection(credential);
-
-        //then
-        Assert.assertNull("return null", result);
-
-    }
-
-    @Test
-    public void test_validateConnection_when_user_Roles_is_empty_return_null_bis() throws JoseException {
-        //given
-        Credential credential = new Credential();
-        credential.setEmail("jean@jean.com");
-        credential.setPassword("1234");
-        String hashPassword = iTools.getStringSha3(credential.getPassword());
-        final User user = BuilderUtils1.buildUser(1L, "jean@jean.com", hashPassword, Gender.Monsieur, "Jean", "Leroy", "0101010101",
-                "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Collections.singletonList(Arrays.asList("1", "USER")));
-        Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);
-        List<Role> roles1 = new ArrayList<>();
-        Mockito.when(roleRepository.findByUsersEmail("jean@jean.com")).thenReturn(roles1);
-
-        //when
-        final Token result = authProvider.validateConnection(credential);
-
-        //then
-        Assert.assertNull("return null", result);
-
-    }
-
-    @Test
-    public void test_validateConnection_when_user_Roles_is_null_return_null() throws JoseException {
-        //given
-        Credential credential = new Credential();
-        credential.setEmail("jean@jean.com");
-        credential.setPassword("1234");
-        String hashPassword = iTools.getStringSha3(credential.getPassword());
-        final User user = BuilderUtils1.buildUser(1L, "jean@jean.com", hashPassword, Gender.Monsieur, "Jean", "Leroy", "0101010101",
-                "9 rue du roi", "75018", "Paris", "9ème étage", Status.ACTIVE, Collections.singletonList(Arrays.asList("1", "USER")));
-        Mockito.when(userRepository.selectMyUserByEmail(Mockito.eq(credential.getEmail()))).thenReturn(user);
-        List<Role> roles1 = null;
-        Mockito.when(roleRepository.findByUsersEmail("jean@jean.com")).thenReturn(roles1);
-
-        //when
-        final Token result = authProvider.validateConnection(credential);
-
-        //then
-        Assert.assertNull("return null", result);
-
     }
 
 }

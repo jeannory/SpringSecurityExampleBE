@@ -33,7 +33,7 @@ public class UserServiceImplTest4 {
     }
 
     @Test
-    public void test_setUser_when_all_parameters_valid() {
+    public void test_modifyUser_when_all_parameters_valid() {
         //given
         final UserDTO userDTO = Mockito.spy(BuilderUtils1.buildUserDTO(1L, "jean@jean.com", "1234", Gender.Madame, "Jeanne", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", null, "USER, MANAGER, ADMIN", Status.ACTIVE));
@@ -57,7 +57,7 @@ public class UserServiceImplTest4 {
         Mockito.when(superModelMapper.convertToDTO(Mockito.any(User.class))).thenReturn(Optional.of(userDTO));
 
         //when
-        UserDTO result = userService.setUser(userDTO);
+        UserDTO result = userService.modifyUser(userDTO);
 
         //then
         Assert.assertEquals(userDTO.getId(), result.getId());
@@ -70,7 +70,7 @@ public class UserServiceImplTest4 {
     }
 
     @Test
-    public void test_setUser_when_user_is_null() {
+    public void test_modifyUser_when_user_is_null() {
         //given
         final UserDTO userDTO = Mockito.spy(BuilderUtils1.buildUserDTO(1L, "jean@jean.com", "1234", Gender.Madame, "Jeanne", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", null, "USER, MANAGER, ADMIN", Status.ACTIVE));
@@ -83,7 +83,7 @@ public class UserServiceImplTest4 {
         Mockito.when(superModelMapper.convertToDTO(Mockito.any(User.class))).thenReturn(Optional.of(userDTO));
 
         //when
-        UserDTO result = userService.setUser(userDTO);
+        UserDTO result = userService.modifyUser(userDTO);
 
         //then
         Assert.assertNull("return null", result);
@@ -91,7 +91,7 @@ public class UserServiceImplTest4 {
 
 
     @Test
-    public void test_setUser_when_save_user_failed() {
+    public void test_modifyUser_when_save_user_failed() {
         //given
         final UserDTO userDTO = Mockito.spy(BuilderUtils1.buildUserDTO(1L, "jean@jean.com", "1234", Gender.Madame, "Jeanne", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", null, "USER, MANAGER, ADMIN", Status.ACTIVE));
@@ -111,14 +111,14 @@ public class UserServiceImplTest4 {
         Mockito.when(userRepository.save(Mockito.any(User.class))).thenThrow(new CustomTransactionalException());
 
         //when
-        final UserDTO result = userService.setUser(userDTO);
+        final UserDTO result = userService.modifyUser(userDTO);
 
         //then
         Assert.assertNull("return null", result);
     }
 
     @Test
-    public void test_setUser_when_convertToDTO_failed() {
+    public void test_modifyUser_when_convertToDTO_failed() {
         //given
         final UserDTO userDTO = Mockito.spy(BuilderUtils1.buildUserDTO(1L, "jean@jean.com", "1234", Gender.Madame, "Jeanne", "Leroy", "0101010101",
                 "9 rue du roi", "75018", "Paris", "9ème étage", null, "USER, MANAGER, ADMIN", Status.ACTIVE));
@@ -139,7 +139,7 @@ public class UserServiceImplTest4 {
         Mockito.when(superModelMapper.convertToDTO(Mockito.any(User.class))).thenReturn(Optional.empty());
 
         //when
-        final UserDTO result = userService.setUser(userDTO);
+        final UserDTO result = userService.modifyUser(userDTO);
 
         //then
         Assert.assertNull("return null", result);

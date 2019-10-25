@@ -14,7 +14,7 @@ public interface IUserService {
 
     Token generateUser(UserDTO userDTOEntry);
 
-    UserDTO setUser(UserDTO userDTO);
+    UserDTO modifyUser(UserDTO userDTO);
 
     List<UserDTO> getUsers();
 

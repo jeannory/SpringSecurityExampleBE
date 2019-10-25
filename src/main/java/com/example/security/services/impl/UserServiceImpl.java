@@ -264,8 +264,9 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
     }
 
     @Override
-    @Transactional(rollbackFor = CustomTransactionalException.class)
-    public UserDTO setUser(UserDTO userDTO) {
+//    @Transactional(rollbackFor = CustomTransactionalException.class)
+    //toDo @Transactional
+    public UserDTO modifyUser(UserDTO userDTO) {
         logger.info("Method setUser");
         final User user = userRepository.findByEmail(userDTO.getEmail());
         if (user == null) {
@@ -316,7 +317,8 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
     }
 
     @Override
-    @Transactional(rollbackFor = CustomTransactionalException.class)
+//    @Transactional(rollbackFor = CustomTransactionalException.class)
+    //toDo @Transactional
     public List<UserDTO> changeUserSatus(UserDTO userDTO) {
         logger.info("Method changeUserSatus");
         try {

@@ -43,8 +43,8 @@ public class User extends SuperEntity{
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Space space;
 
-    @Transient
-    private String flattenRoles;
+//    @Transient
+//    private String flattenRoles;
 
     public User() {
     }

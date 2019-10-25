@@ -59,14 +59,14 @@ public class SuperModelMapper<E extends SuperEntity, D extends SuperDTO>  implem
 
     public Optional<E> convertToEntity(final D dto) {
         logger.info("Method convertToEntity");
-        if (dto == null) {
-            return Optional.empty();
-        }
-        E entity = singletonBean.getModelMapper().map(dto, (Type) dto.getEntityClass());
-        if(dto.getClass().equals(UserDTO.class)){
-            entity = convertToUser(entity);
-        }
-        return Optional.of(entity);
+            if (dto == null) {
+                return Optional.empty();
+            }
+            E entity = singletonBean.getModelMapper().map(dto, (Type) dto.getEntityClass());
+            if (dto.getClass().equals(UserDTO.class)) {
+                entity = convertToUser(entity);
+            }
+            return Optional.of(entity);
     }
 
     //hash password for persistence or authentication
@@ -74,7 +74,7 @@ public class SuperModelMapper<E extends SuperEntity, D extends SuperDTO>  implem
         logger.info("Method convertToUser");
         final User user = (User) entity;
         user.setPassword(getStringSha3(user.getPassword()));
-        return (E) user;
+        return  (E) user;
     }
 
     public List<D> convertToDTOs(final List<E> entities) {
