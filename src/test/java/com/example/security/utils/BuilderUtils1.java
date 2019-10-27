@@ -173,8 +173,11 @@ public class BuilderUtils1 {
             JsonNode rootNode;
             rootNode = objectMapper.readValue(decodeHeader, JsonNode.class);
             JsonNode node = rootNode.path(nodeName);
-            String kid = node.asText();
-            return kid;
+            String result = node.asText();
+            if(!result.isEmpty()){
+                return result;
+            }
+            return node.toString();
         } catch (Exception ex) {
             throw new CustomJwtException("failed to get infos from the token");
         }
