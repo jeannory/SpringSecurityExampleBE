@@ -117,6 +117,7 @@ public class SuperModelMapperTest implements ITools {
 
         //then
         Assert.assertEquals("ADMIN", result.get().getName());
+        Assert.assertEquals(Role.class, result.get().getClass());
     }
 
     @Test
@@ -146,7 +147,7 @@ public class SuperModelMapperTest implements ITools {
         //then
         Assert.assertEquals("Espace de Jean", result.get().getName());
         Assert.assertEquals("jean@gmail.com", result.get().getUser().getEmail());
-
+        Assert.assertEquals(Space.class, result.get().getClass());
     }
 
     @Test
@@ -176,6 +177,7 @@ public class SuperModelMapperTest implements ITools {
 
         //then
         Assert.assertEquals("jean@gmail.com", result.get().getEmail());
+        Assert.assertEquals(User.class, result.get().getClass());
         final String sha3Password = getStringSha3("1234");
         Assert.assertEquals(sha3Password, result.get().getPassword());
         Assert.assertNull("roles are null", result.get().getRoles());

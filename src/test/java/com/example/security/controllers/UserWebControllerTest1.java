@@ -94,15 +94,15 @@ public class UserWebControllerTest1 implements ITools {
         /**
          * userTest cannot be retrieved with getUser because userTest has no roles (UserUserDTOConverter condition)
          */
-        final ResultActions resultActions3 = invokeGetUser(credential, "userTest");
+        final ResultActions resultActions3 = invokeGetUser(credential, "userTest@test.com");
         final MvcResult mvcResult3 = resultActions3
                 .andExpect(status().isNotFound())
                 .andReturn();
         /**
          * userTest exist in memory test (or database) and the entity can be retrieve with userRepository.selectMyUserByEmail
          */
-        final User user = userRepository.selectMyUserByEmail("userTest");
-        Assert.assertEquals("userTest", user.getEmail());
+        final User user = userRepository.selectMyUserByEmail("userTest@test.com");
+        Assert.assertEquals("userTest@test.com", user.getEmail());
     }
 
     /**
@@ -152,7 +152,7 @@ public class UserWebControllerTest1 implements ITools {
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].email", is("jean@jean.com")))
                 .andReturn();
-        final User user = userRepository.selectMyUserByEmail("userTest");
+        final User user = userRepository.selectMyUserByEmail("userTest@test.com");
         Assert.assertNull("return null", user);
     }
 

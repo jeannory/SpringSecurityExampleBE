@@ -91,27 +91,32 @@ public class UserWebControllerTest2 implements ITools {
      * tests of end-points
      */
     @Test
-    public void test_validateConnection_when_parameters_valid_should_return_status_ok_with_string() throws Exception {
+    public void test_validateConnection_when_credential_valid_should_return_status_ok_with_Token() throws Exception {
         //given
         final Credential credential = new Credential();
         credential.setEmail("jean@jean.com");
         credential.setPassword("0000");
+
         //when && then
         final MvcResult mvcResult = invokeValidateConnection(credential)
                 .andExpect(status().isOk())
                 .andReturn();
         final Token result = builderUtils2.fromJsonResult(mvcResult, Token.class);
+        System.out.println(result.getToken());
         Assert.assertFalse(result.getToken().isEmpty());
         final String sub = BuilderUtils1.getStringFromJwtNode(result.getToken(), 1, "sub");
         Assert.assertEquals("jean@jean.com", sub);
+        final String roles = BuilderUtils1.getStringFromJwtNode(result.getToken(), 1, "roles");
+        Assert.assertEquals("[\"USER\",\"MANAGER\",\"ADMIN\"]", roles);
     }
 
     @Test
-    public void test_validateConnection_when_credentials_non_valid_should_return_status_unauthorized() throws Exception {
+    public void test_validateConnection_when_credential_not_valid_should_return_status_unauthorized_401() throws Exception {
         //given
         final Credential credential = new Credential();
         credential.setEmail("jean@jean.com");
         credential.setPassword("wrong password");
+
         //when && then
         final MvcResult mvcResult = invokeValidateConnection(credential)
                 .andExpect(status().isUnauthorized())
@@ -119,24 +124,65 @@ public class UserWebControllerTest2 implements ITools {
     }
 
     @Test
-    public void test_validateConnection_when_credentials_is_empty_should_return_status_unauthorized() throws Exception {
+    public void test_validateConnection_when_credential_email_no_exist_should_return_status_unauthorized_401() throws Exception {
+        //given
+        final Credential credential = new Credential();
+        credential.setEmail("EmailNotOnDatabase@gmail.com");
+        credential.setPassword("wrong password");
+
+        //when && then
+        final MvcResult mvcResult = invokeValidateConnection(credential)
+                .andExpect(status().isUnauthorized())
+                .andReturn();
+    }
+
+    @Test
+    public void test_validateConnection_when_credential_email_is_empty_should_return_status_404() throws Exception {
         //given
         final Credential credential = new Credential();
         credential.setEmail("");
-        credential.setPassword("");
+        credential.setPassword("1234");
+
         //when && then
         final MvcResult mvcResult = invokeValidateConnection(credential)
-                .andExpect(status().isUnauthorized())
+                .andExpect(status().isNotFound())
                 .andReturn();
     }
 
     @Test
-    public void test_getUser_when_jwt_role_ADMIN_should_return_himself_with_status_ok() throws Exception{
+    public void test_validateConnection_when_credential_password_is_empty_should_return_status_404() throws Exception {
+        //given
+        final Credential credential = new Credential();
+        credential.setEmail("jean@jean.com");
+        credential.setPassword("");
+
+        //when && then
+        final MvcResult mvcResult = invokeValidateConnection(credential)
+                .andExpect(status().isNotFound())
+                .andReturn();
+    }
+
+    @Test
+    public void test_validateConnection_when_credential_email_is_not_valid_email_should_return_status_404() throws Exception {
+        //given
+        final Credential credential = new Credential();
+        credential.setEmail("this is not an email");
+        credential.setPassword("1234");
+
+        //when && then
+        final MvcResult mvcResult = invokeValidateConnection(credential)
+                .andExpect(status().isNotFound())
+                .andReturn();
+    }
+
+    @Test
+    public void test_getUser_when_jwt_role_is_ADMIN_should_return_himself_with_status_ok() throws Exception{
         //given
         final Credential credential = new Credential();
         credential.setEmail("jean@jean.com");
         credential.setPassword("0000");
         final ResultActions resultActions = invokeGetUser(credential, "jean@jean.com");
+
         //when && then
         final MvcResult mvcResult = resultActions
                 .andExpect(status().isOk())
@@ -155,6 +201,7 @@ public class UserWebControllerTest2 implements ITools {
         credential.setEmail("jean@jean.com");
         credential.setPassword("0000");
         final ResultActions resultActions = invokeGetUser(credential, "jeanne@jeanne.com");
+
         //when && then
         final MvcResult mvcResult = resultActions
                 .andExpect(status().isOk())
@@ -173,6 +220,7 @@ public class UserWebControllerTest2 implements ITools {
         credential.setEmail("johny@johny.com");
         credential.setPassword("0000");
         final ResultActions resultActions = invokeGetUser(credential, "johny@johny.com");
+
         //when && then
         final MvcResult mvcResult = resultActions
                 .andExpect(status().isOk())
@@ -191,6 +239,7 @@ public class UserWebControllerTest2 implements ITools {
         credential.setEmail("johny@johny.com");
         credential.setPassword("0000");
         final ResultActions resultActions = invokeGetUser(credential, "jeanne@jeanne.com");
+
         //when && then
         final MvcResult mvcResult = resultActions
                 .andExpect(status().isForbidden())
@@ -204,6 +253,7 @@ public class UserWebControllerTest2 implements ITools {
         credential.setEmail("jean@jean.com");
         credential.setPassword("0000");
         final ResultActions resultActions = invokeGetUser(credential, "not found user");
+
         //when && then
         final MvcResult mvcResult = resultActions
                 .andExpect(status().isNotFound())
@@ -211,11 +261,12 @@ public class UserWebControllerTest2 implements ITools {
     }
 
     @Test
-    public void test_getRoles_when_has_ADMIN_role_should_return_status_ok_with_results() throws Exception {
+    public void test_getRoles_when_has_role_ADMIN_should_return_status_ok_with_roles() throws Exception {
         //given
         final Credential credential = new Credential();
         credential.setEmail("jean@jean.com");
         credential.setPassword("0000");
+
         //when && then
         final MvcResult mvcResult = invokeGetRoles(credential)
                 .andExpect(status().isOk())
@@ -231,11 +282,12 @@ public class UserWebControllerTest2 implements ITools {
     }
 
     @Test
-    public void test_getRoles_when_has_MANAGER_role_should_return_forbidden() throws Exception {
+    public void test_getRoles_when_has_role_MANAGER_should_return_status_forbidden() throws Exception {
         //given
         final Credential credential = new Credential();
         credential.setEmail("johny@johny.com");
         credential.setPassword("0000");
+
         //when && then
         final MvcResult mvcResult = invokeGetRoles(credential)
                 .andExpect(status().isForbidden())
@@ -243,11 +295,12 @@ public class UserWebControllerTest2 implements ITools {
     }
 
     @Test
-    public void test_getRoles_when_has_USER_role_should_return_forbidden() throws Exception {
+    public void test_getRoles_when_has_role_USER_should_return_status_forbidden() throws Exception {
         //given
         final Credential credential = new Credential();
         credential.setEmail("jeanne@jeanne.com");
         credential.setPassword("0000");
+
         //when && then
         final MvcResult mvcResult = invokeGetRoles(credential)
                 .andExpect(status().isForbidden())
@@ -255,10 +308,11 @@ public class UserWebControllerTest2 implements ITools {
     }
 
     @Test
-    public void test_getRoles_when_no_token_role_should_return_forbidden() throws Exception {
+    public void test_getRoles_when_no_token_on_header_should_return_forbidden() throws Exception {
         //given
         final ResultActions resultActions = mockMvc.perform(get(BASE_URL + "/getRoles")
                 .accept(MediaType.APPLICATION_JSON));
+
         //when && then
         final MvcResult mvcResult = resultActions
                 .andExpect(status().isForbidden())
@@ -274,6 +328,7 @@ public class UserWebControllerTest2 implements ITools {
         userDTO.setFirstName("john");
         userDTO.setLastName("john");
         userDTO.setGender(Gender.Monsieur);
+
         //when && then
         final MvcResult mvcResult = invokeRegisterUser(userDTO)
                 .andExpect(status().isOk())
@@ -321,6 +376,7 @@ public class UserWebControllerTest2 implements ITools {
         userDTO.setFirstName("john");
         userDTO.setLastName("john");
         userDTO.setGender(Gender.Monsieur);
+
         //when && then
         final MvcResult mvcResult = invokeRegisterUser(userDTO)
                 .andExpect(status().isNotFound())
@@ -338,6 +394,7 @@ public class UserWebControllerTest2 implements ITools {
         userDTO.setPassword("0000");
         userDTO.setLastName("john");
         userDTO.setGender(Gender.Monsieur);
+
         //when && then
         final MvcResult mvcResult = invokeRegisterUser(userDTO)
                 .andExpect(status().isNotFound())
@@ -355,6 +412,7 @@ public class UserWebControllerTest2 implements ITools {
         userDTO.setPassword("0000");
         userDTO.setFirstName("john");
         userDTO.setGender(Gender.Monsieur);
+
         //when && then
         final MvcResult mvcResult = invokeRegisterUser(userDTO)
                 .andExpect(status().isNotFound())
@@ -383,6 +441,7 @@ public class UserWebControllerTest2 implements ITools {
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
         );
+
         //when && then
         final MvcResult mvcResult = resultActions
                 .andExpect(status().isOk())
@@ -398,6 +457,7 @@ public class UserWebControllerTest2 implements ITools {
         final Credential credential = new Credential();
         credential.setEmail("jean@jean.com");
         credential.setPassword("0000");
+
         //when && then
         final MvcResult mvcResult = invokeGetUsers(credential)
                 .andExpect(status().isOk())
@@ -425,6 +485,7 @@ public class UserWebControllerTest2 implements ITools {
                 .param("email", "jean@jean.com")
                 .accept(MediaType.APPLICATION_JSON)
         );
+
         //when && then
         final MvcResult mvcResult = resultActions
                 .andExpect(status().isOk())
@@ -444,20 +505,19 @@ public class UserWebControllerTest2 implements ITools {
         credential.setPassword("0000");
         credential.setPassword("0000");
         final ResultActions resultActions1 = invokeGetUser(credential, "jeanne@jeanne.com");
-
         final MvcResult mvcResult1 = resultActions1
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("email",is("jeanne@jeanne.com")))
                 //jeanne@jeanne.com roles
                 .andExpect(jsonPath("flattenRoles",is("USER")))
                 .andReturn();
-
         List<RoleDTO> roleDTOS = Arrays.asList(
                 BuilderUtils1.buildRoleDTO(Arrays.asList("1001","USER")),
                 BuilderUtils1.buildRoleDTO(Arrays.asList("1002","MANAGER")),
                 BuilderUtils1.buildRoleDTO(Arrays.asList("1003","ADMIN"))
         );
         final String token = getAccessToken(credential);
+
         //when
         final ResultActions resultActions2 = mockMvc.perform(put(BASE_URL+"/putUserRoles")
                 .content(builderUtils2.asJsonString(roleDTOS))
@@ -465,6 +525,7 @@ public class UserWebControllerTest2 implements ITools {
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
         );
+
         //then
         final MvcResult mvcResult2 = resultActions2
                 .andExpect(status().isOk())
@@ -487,6 +548,7 @@ public class UserWebControllerTest2 implements ITools {
         credential.setEmail("jean@jean.com");
         credential.setPassword("0000");
         final String token = getAccessToken(credential);
+
         //when
         final ResultActions resultActions = mockMvc.perform(put(BASE_URL+"/putUserRoles")
                         .content("[{\"name\":\"USER\"},{\"name\":\"MANAGER\"},{\"name\":\"ADMIN\"}]")
@@ -494,6 +556,7 @@ public class UserWebControllerTest2 implements ITools {
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
         );
+
         //then
         //return 500
         final MvcResult mvcResult = resultActions

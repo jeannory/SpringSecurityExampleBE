@@ -80,7 +80,7 @@ public class UserServiceImpl implements UserDetailsService, IUserService, ITools
             no persistence of userTest when rollback
              */
             final User userTest = new User();
-            userTest.setEmail("userTest");
+            userTest.setEmail("userTest@test.com");
             userTest.setPassword(getStringSha3("userTest"));
             userRepository.save(userTest);
 

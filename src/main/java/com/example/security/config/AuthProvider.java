@@ -83,11 +83,6 @@ public class AuthProvider implements ITools {
         return user;
     }
 
-    private boolean isValidEmail(String email) {
-        String regex = "^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$";
-        return email.matches(regex);
-    }
-
     private String generateJwt(String email) {
         logger.info("Method generateJwt");
         try {

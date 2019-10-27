@@ -8,6 +8,7 @@ import com.example.security.models.Credential;
 import com.example.security.models.Token;
 import com.example.security.services.IRoleService;
 import com.example.security.services.IUserService;
+import com.example.security.tools.ITools;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,7 @@ import java.util.List;
 @CrossOrigin("*")
 @RestController
 @RequestMapping(PRE_PATH + USER_CONTROLLER)
-public class UserWebController extends SuperController {
+public class UserWebController extends SuperController implements ITools {
 
     private final static Logger logger = Logger.getLogger(UserWebController.class);
     @Autowired
@@ -56,6 +57,12 @@ public class UserWebController extends SuperController {
 
     private Token validateToken(final Credential credential) {
         logger.info("Method validateToken");
+        if (!isValidEmail(credential.getEmail()) || credential.getPassword().isEmpty()) {
+            logger.error("Not found 404");
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Not found 404"
+            );
+        }
         final Token token = authProvider.validateConnection(credential);
         if (token == null) {
             logger.error("Unauthorized 401");
@@ -87,7 +94,14 @@ public class UserWebController extends SuperController {
     @RequestMapping(path = "/getRoles", method = RequestMethod.GET)
     public List<RoleDTO> getRoles() {
         logger.info("End point getRoles");
-        return roleService.getAdminRoleDTOS();
+        List<RoleDTO> roleDTOS = roleService.getAdminRoleDTOS();
+        if(roleDTOS.isEmpty()){
+            logger.error("Not found 404");
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Not found 404"
+            );
+        }
+        return roleDTOS;
     }
 
     //http://localhost:8080/api/UserWebController/registerUser
